@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Prevenção de Evasão</title>
+  <meta name="description" content="Gestão por exceção para prevenir evasão de jovens aprendizes vulneráveis." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #f0f0f3;
+      --border: rgba(0,0,0,0.08);
+      --text: #111112;
+      --text2: #6b6b7a;
+      --text3: #9999a8;
+      --accent: #1a1a2e;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-text: #1d4ed8;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --green-text: #15803d;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --amber-text: #b45309;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --red-text: #b91c1c;
+      --purple: #7c3aed;
+      --purple-bg: #f5f3ff;
+      --purple-text: #6d28d9;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+      --sidebar-w: 240px;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--accent);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      padding: 0 0 1.5rem;
+    }
+
+    .sidebar-logo {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.01em;
+      display: block;
+    }
+    .sidebar-logo small {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      font-weight: 400;
+    }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 1rem 0.5rem 0.4rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-xs);
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-item svg { flex-shrink: 0; opacity: 0.7; }
+    .nav-item.active svg { opacity: 1; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 99px;
+      font-family: var(--mono);
+    }
+    .nav-badge.amber { background: var(--amber); }
+
+    .sidebar-footer {
+      padding: 0 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1rem;
+    }
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-xs);
+    }
+    .avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: #fff;
+      flex-shrink: 0;
+    }
+    .sidebar-user-info span { display: block; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8); }
+    .sidebar-user-info small { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-left { display: flex; flex-direction: column; }
+    .topbar-left h1 { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .topbar-left span { font-size: 12px; color: var(--text2); }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    .topbar-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 0.875rem; height: 32px;
+      border-radius: var(--radius-xs);
+      font-size: 12px; font-weight: 500;
+      cursor: pointer; border: none;
+      font-family: var(--font);
+      transition: background 0.15s;
+    }
+    .topbar-btn.ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .topbar-btn.ghost:hover { background: var(--surface2); }
+    .topbar-btn.primary { background: var(--accent); color: #fff; }
+    .topbar-btn.primary:hover { background: #2a2a4a; }
+
+    .period-select {
+      font-family: var(--font);
+      font-size: 12px;
+      color: var(--text2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 0 0.75rem;
+      height: 32px;
+      background: var(--surface);
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ── Content ── */
+    .content { padding: 1.75rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── Alert banner ── */
+    .alert-banner {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 13px;
+      color: #92400e;
+    }
+    .alert-banner svg { flex-shrink: 0; }
+    .alert-banner strong { font-weight: 600; }
+
+    /* ── KPI Grid ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.125rem 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .kpi-header { display: flex; align-items: center; justify-content: space-between; }
+    .kpi-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+    .kpi-icon { width: 28px; height: 28px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; }
+    .kpi-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .kpi-icon.green { background: var(--green-bg); color: var(--green); }
+    .kpi-icon.amber { background: var(--amber-bg); color: var(--amber); }
+    .kpi-icon.red { background: var(--red-bg); color: var(--red); }
+    .kpi-icon.purple { background: var(--purple-bg); color: var(--purple); }
+    .kpi-value { font-size: 28px; font-weight: 600; color: var(--text); letter-spacing: -0.03em; font-family: var(--mono); line-height: 1.1; }
+    .kpi-sub { font-size: 11px; color: var(--text3); }
+    .kpi-delta {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 500;
+      padding: 2px 6px; border-radius: 99px;
+    }
+    .kpi-delta.up { background: var(--green-bg); color: var(--green-text); }
+    .kpi-delta.down { background: var(--red-bg); color: var(--red-text); }
+    .kpi-delta.neutral { background: var(--surface2); color: var(--text2); }
+
+    /* ── Row: charts + risk ── */
+    .row-2col { display: grid; grid-template-columns: 1fr 340px; gap: 1rem; }
+    .row-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .card-subtitle { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .card-action { font-size: 11px; color: var(--blue); cursor: pointer; font-weight: 500; }
+
+    .chart-wrap { position: relative; height: 200px; }
+
+    /* ── Risk list ── */
+    .risk-list { display: flex; flex-direction: column; gap: 0.625rem; }
+    .risk-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .risk-item:hover { border-color: rgba(0,0,0,0.18); }
+    .risk-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .risk-dot.critical { background: var(--red); }
+    .risk-dot.high { background: var(--amber); }
+    .risk-dot.medium { background: var(--blue); }
+    .risk-info { flex: 1; min-width: 0; }
+    .risk-name { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .risk-detail { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .risk-score {
+      font-size: 12px; font-weight: 600;
+      font-family: var(--mono);
+      padding: 2px 7px; border-radius: 99px;
+    }
+    .risk-score.critical { background: var(--red-bg); color: var(--red-text); }
+    .risk-score.high { background: var(--amber-bg); color: var(--amber-text); }
+    .risk-score.medium { background: var(--blue-bg); color: var(--blue-text); }
+
+    /* ── Progress bar ── */
+    .progress-bar { height: 5px; border-radius: 99px; background: var(--surface2); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+    .progress-fill.green { background: var(--green); }
+    .progress-fill.amber { background: var(--amber); }
+    .progress-fill.red { background: var(--red); }
+    .progress-fill.blue { background: var(--blue); }
+    .progress-fill.purple { background: var(--purple); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--surface2); }
+
+    .tag {
+      display: inline-flex; align-items: center;
+      font-size: 10px; font-weight: 500;
+      padding: 2px 7px; border-radius: 99px;
+      white-space: nowrap;
+    }
+    .tag.green { background: var(--green-bg); color: var(--green-text); }
+    .tag.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .tag.red { background: var(--red-bg); color: var(--red-text); }
+    .tag.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .tag.purple { background: var(--purple-bg); color: var(--purple-text); }
+    .tag.gray { background: var(--surface2); color: var(--text2); }
+
+    /* ── Pais section ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding-bottom: 0.1rem;
+      border-bottom: 2px solid var(--purple);
+      display: inline-block;
+      margin-bottom: -0.25rem;
+    }
+
+    .parent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .contact-item:last-child { border-bottom: none; }
+    .contact-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600;
+      flex-shrink: 0;
+    }
+    .contact-avatar.purple { background: var(--purple-bg); color: var(--purple-text); }
+    .contact-avatar.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .contact-avatar.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .contact-info span { display: block; font-size: 12px; font-weight: 500; }
+    .contact-info small { font-size: 11px; color: var(--text3); }
+    .contact-status { margin-left: auto; }
+
+    .engagement-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .engagement-row:last-child { border-bottom: none; }
+    .engagement-label { font-size: 12px; color: var(--text2); min-width: 140px; }
+    .engagement-bar-wrap { flex: 1; }
+    .engagement-val { font-size: 12px; font-weight: 500; font-family: var(--mono); min-width: 30px; text-align: right; }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row-label { color: var(--text2); }
+    .stat-row-val { font-weight: 600; font-family: var(--mono); }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .row-2col { grid-template-columns: 1fr; }
+      .parent-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .row-3col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+    <span>Radar Descubra!</span>
+    <small>Sistema de Acompanhamento</small>
+  </div>
+    <nav class="sidebar-nav">
+    <div class="nav-section-label">Visão Geral</div>
+    <a href="dashboard.html" class="nav-item active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="aprendizes.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Aprendizes
+      <span class="nav-badge">14</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Pais / Responsáveis
+      <span class="nav-badge amber">3</span>
+    </a>
+    <div class="nav-section-label">Monitoramento</div>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Riscos
+    </a>
+    <a href="mapa_territorial.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+      Mapa Territorial
+    </a>
+    <div class="nav-section-label">Operacional</div>
+    <a href="vagas_alocacao.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Vagas e Alocação
+    </a>
+    <a href="comunicacoes.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Comunicações
+      <span class="nav-badge">5</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda
+    </a>
+    <a href="relatorios.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Relatórios
+    </a>
+    <div class="nav-section-label">Configurações</div>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Configurações
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar">MO</div>
+      <div class="sidebar-user-info">
+        <span>Maria Oliveira</span>
+        <small>Técnica de Referência</small>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Painel de Monitoramento</h1>
+      <span>Gestão por exceção · Turma 2025/01</span>
+    </div>
+    <div class="topbar-right">
+      <select class="period-select">
+        <option>Maio 2025</option>
+        <option>Abril 2025</option>
+        <option>Março 2025</option>
+        <option>Últimos 3 meses</option>
+      </select>
+      <button class="topbar-btn ghost">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar
+      </button>
+      <button class="topbar-btn primary">+ Novo Caso</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Alert banner -->
+    <div class="alert-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div><strong>4 aprendizes em risco crítico</strong> precisam de contato imediato. <span style="color:#b45309; cursor:pointer; text-decoration:underline;">Ver lista prioritária →</span></div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Total de Aprendizes</span>
+          <div class="kpi-icon blue">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value">247</div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+          <span class="kpi-delta up">↑ +8</span>
+          <span class="kpi-sub">vs. mês anterior</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Taxa de Preservação</span>
+          <div class="kpi-icon green">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value">91,3<span style="font-size:16px; font-weight:400; color:var(--text3)">%</span></div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+          <span class="kpi-delta up">↑ +1.2pp</span>
+          <span class="kpi-sub">meta: 90%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Em Risco (Alto/Crítico)</span>
+          <div class="kpi-icon red">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value">21</div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+          <span class="kpi-delta down">↑ +3</span>
+          <span class="kpi-sub">vs. mês anterior</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Contatos Pendentes c/ Pais</span>
+          <div class="kpi-icon purple">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.39 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.06 6.06l1.36-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value">9</div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+          <span class="kpi-delta neutral">→ 3 sem resposta</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="row-2col">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Evolução da Frequência</div>
+            <div class="card-subtitle">Últimos 6 meses · média da turma vs. grupo de risco</div>
+          </div>
+          <span class="card-action">Ver detalhes</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chartFreq" role="img" aria-label="Evolução de frequência dos últimos 6 meses">Dados de frequência mensal da turma.</canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Prioridade por Risco</div>
+            <div class="card-subtitle">Aprendizes que precisam de ação</div>
+          </div>
+        </div>
+        <div class="risk-list">
+          <div class="risk-item">
+            <div class="risk-dot critical"></div>
+            <div class="risk-info">
+              <div class="risk-name">Carlos A. Ferreira</div>
+              <div class="risk-detail">3 faltas consecutivas · sem contato</div>
+            </div>
+            <span class="risk-score critical">9.2</span>
+          </div>
+          <div class="risk-item">
+            <div class="risk-dot critical"></div>
+            <div class="risk-info">
+              <div class="risk-name">Bianca S. Lima</div>
+              <div class="risk-detail">Queda de desempenho · família em crise</div>
+            </div>
+            <span class="risk-score critical">8.7</span>
+          </div>
+          <div class="risk-item">
+            <div class="risk-dot high"></div>
+            <div class="risk-info">
+              <div class="risk-name">João P. Mendes</div>
+              <div class="risk-detail">Atrasos recorrentes · pai não atendeu</div>
+            </div>
+            <span class="risk-score high">7.1</span>
+          </div>
+          <div class="risk-item">
+            <div class="risk-dot high"></div>
+            <div class="risk-info">
+              <div class="risk-name">Lara T. Santos</div>
+              <div class="risk-detail">Abandono parcial de tarefas</div>
+            </div>
+            <span class="risk-score high">6.8</span>
+          </div>
+          <div class="risk-item">
+            <div class="risk-dot medium"></div>
+            <div class="risk-info">
+              <div class="risk-name">Rafael O. Costa</div>
+              <div class="risk-detail">Frequência abaixo de 75%</div>
+            </div>
+            <span class="risk-score medium">5.3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SEÇÃO PAIS / RESPONSÁVEIS
+    ═══════════════════════════════════════════ -->
+    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:-0.5rem;">
+      <span class="section-label">Pais &amp; Responsáveis</span>
+      <span style="font-size:11px; color:var(--text3);">Acompanhamento de engajamento familiar</span>
+    </div>
+
+    <div class="parent-grid">
+
+      <!-- Card: Engajamento dos Pais -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Engajamento Familiar</div>
+            <div class="card-subtitle">% de responsáveis ativos por canal</div>
+          </div>
+          <span class="card-action">+ Registrar contato</span>
+        </div>
+        <div>
+          <div class="engagement-row">
+            <span class="engagement-label">Responderam contato</span>
+            <div class="engagement-bar-wrap">
+              <div class="progress-bar"><div class="progress-fill green" style="width:72%"></div></div>
+            </div>
+            <span class="engagement-val">72%</span>
+          </div>
+          <div class="engagement-row">
+            <span class="engagement-label">Presença em reuniões</span>
+            <div class="engagement-bar-wrap">
+              <div class="progress-bar"><div class="progress-fill blue" style="width:54%"></div></div>
+            </div>
+            <span class="engagement-val">54%</span>
+          </div>
+          <div class="engagement-row">
+            <span class="engagement-label">Via WhatsApp</span>
+            <div class="engagement-bar-wrap">
+              <div class="progress-bar"><div class="progress-fill green" style="width:88%"></div></div>
+            </div>
+            <span class="engagement-val">88%</span>
+          </div>
+          <div class="engagement-row">
+            <span class="engagement-label">Via ligação telefônica</span>
+            <div class="engagement-bar-wrap">
+              <div class="progress-bar"><div class="progress-fill amber" style="width:41%"></div></div>
+            </div>
+            <span class="engagement-val">41%</span>
+          </div>
+          <div class="engagement-row">
+            <span class="engagement-label">Sem contato ativo</span>
+            <div class="engagement-bar-wrap">
+              <div class="progress-bar"><div class="progress-fill red" style="width:18%"></div></div>
+            </div>
+            <span class="engagement-val">18%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: KPIs de pais -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Panorama Familiar</div>
+            <div class="card-subtitle">Indicadores do mês corrente</div>
+          </div>
+        </div>
+        <div>
+          <div class="stat-row">
+            <span class="stat-row-label">Responsáveis cadastrados</span>
+            <span class="stat-row-val">231</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">Contatos realizados (mês)</span>
+            <span class="stat-row-val">87</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">Sem resposta (&gt;7 dias)</span>
+            <span class="stat-row-val" style="color:var(--red)">9</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">Alertas enviados p/ família</span>
+            <span class="stat-row-val">34</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">Reuniões agendadas</span>
+            <span class="stat-row-val">12</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">Confirmadas</span>
+            <span class="stat-row-val" style="color:var(--green)">8</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">Taxa de atendimento familiar</span>
+            <span class="stat-row-val">72,3%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Histórico de contatos recentes -->
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Últimos Contatos com Responsáveis</div>
+            <div class="card-subtitle">Registros recentes · ordenados por urgência</div>
+          </div>
+          <span class="card-action">Ver todos</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Responsável</th>
+                <th>Aprendiz</th>
+                <th>Canal</th>
+                <th>Data</th>
+                <th>Situação</th>
+                <th>Próximo passo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="contact-avatar red" style="background:var(--red-bg); color:var(--red-text); width:24px; height:24px; font-size:9px;">AF</div>
+                    Ana Ferreira
+                  </div>
+                </td>
+                <td>Carlos A. Ferreira</td>
+                <td><span class="tag amber">Ligação</span></td>
+                <td style="color:var(--text2); font-family:var(--mono); font-size:11px;">20/05/25</td>
+                <td><span class="tag red">Sem resposta</span></td>
+                <td style="color:var(--text2); font-size:11px;">Visita domiciliar</td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="contact-avatar purple" style="background:var(--purple-bg); color:var(--purple-text); width:24px; height:24px; font-size:9px;">RL</div>
+                    Roberto Lima
+                  </div>
+                </td>
+                <td>Bianca S. Lima</td>
+                <td><span class="tag green">WhatsApp</span></td>
+                <td style="color:var(--text2); font-family:var(--mono); font-size:11px;">22/05/25</td>
+                <td><span class="tag amber">Em andamento</span></td>
+                <td style="color:var(--text2); font-size:11px;">Reunião 28/05</td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="contact-avatar blue" style="background:var(--blue-bg); color:var(--blue-text); width:24px; height:24px; font-size:9px;">CM</div>
+                    Claudia Mendes
+                  </div>
+                </td>
+                <td>João P. Mendes</td>
+                <td><span class="tag green">WhatsApp</span></td>
+                <td style="color:var(--text2); font-family:var(--mono); font-size:11px;">23/05/25</td>
+                <td><span class="tag green">Respondeu</span></td>
+                <td style="color:var(--text2); font-size:11px;">Monitorar frequência</td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="contact-avatar amber" style="background:var(--amber-bg); color:var(--amber-text); width:24px; height:24px; font-size:9px;">PS</div>
+                    Paulo Santos
+                  </div>
+                </td>
+                <td>Lara T. Santos</td>
+                <td><span class="tag blue">E-mail</span></td>
+                <td style="color:var(--text2); font-family:var(--mono); font-size:11px;">24/05/25</td>
+                <td><span class="tag red">Sem resposta</span></td>
+                <td style="color:var(--text2); font-size:11px;">Nova tentativa ligação</td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="contact-avatar" style="background:var(--green-bg); color:var(--green-text); width:24px; height:24px; font-size:9px;">MC</div>
+                    Marta Costa
+                  </div>
+                </td>
+                <td>Rafael O. Costa</td>
+                <td><span class="tag amber">Ligação</span></td>
+                <td style="color:var(--text2); font-family:var(--mono); font-size:11px;">27/05/25</td>
+                <td><span class="tag green">Confirmou reunião</span></td>
+                <td style="color:var(--text2); font-size:11px;">Reunião 30/05 14h</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row: Distribuição de risco + Atividades recentes -->
+    <div class="row-3col">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Distribuição de Risco</div>
+            <div class="card-subtitle">Classificação atual da turma</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:0.5rem;">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span style="color:var(--red-text); font-weight:500;">Crítico</span>
+              <span style="font-family:var(--mono); font-weight:600; color:var(--text);">4</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill red" style="width:6%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span style="color:var(--amber-text); font-weight:500;">Alto</span>
+              <span style="font-family:var(--mono); font-weight:600; color:var(--text);">17</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill amber" style="width:22%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span style="color:var(--blue-text); font-weight:500;">Médio</span>
+              <span style="font-family:var(--mono); font-weight:600; color:var(--text);">38</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill blue" style="width:48%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span style="color:var(--green-text); font-weight:500;">Baixo / Estável</span>
+              <span style="font-family:var(--mono); font-weight:600; color:var(--text);">188</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Desempenho por Módulo</div>
+            <div class="card-subtitle">Média de aproveitamento</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:0.5rem;">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span style="color:var(--text2);">Legislação Trabalhista</span>
+              <span style="font-family:var(--mono); color:var(--text); font-weight:500;">78%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill blue" style="width:78%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span style="color:var(--text2);">Comunicação Profissional</span>
+              <span style="font-family:var(--mono); color:var(--text); font-weight:500;">85%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill green" style="width:85%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span style="color:var(--text2);">Matemática Financeira</span>
+              <span style="font-family:var(--mono); color:var(--text); font-weight:500;">61%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill amber" style="width:61%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span style="color:var(--text2);">Relações Interpessoais</span>
+              <span style="font-family:var(--mono); color:var(--text); font-weight:500;">91%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill green" style="width:91%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Atividade Recente</div>
+            <div class="card-subtitle">Ações do sistema</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0;">
+          <div class="stat-row">
+            <span class="stat-row-label" style="display:flex; flex-direction:column;"><span>Alerta enviado</span><small style="color:var(--text3); font-size:10px;">Carlos A. · há 2h</small></span>
+            <span class="tag red">Crítico</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label" style="display:flex; flex-direction:column;"><span>Reunião confirmada</span><small style="color:var(--text3); font-size:10px;">Família Costa · há 3h</small></span>
+            <span class="tag green">OK</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label" style="display:flex; flex-direction:column;"><span>Relatório gerado</span><small style="color:var(--text3); font-size:10px;">Mensal · há 5h</small></span>
+            <span class="tag blue">Info</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label" style="display:flex; flex-direction:column;"><span>Sem resposta</span><small style="color:var(--text3); font-size:10px;">Família Santos · há 1d</small></span>
+            <span class="tag amber">Pendente</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label" style="display:flex; flex-direction:column;"><span>Novo aprendiz</span><small style="color:var(--text3); font-size:10px;">Turma 2025/01 · há 2d</small></span>
+            <span class="tag gray">Registrado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<script>
+  const freqCtx = document.getElementById('chartFreq').getContext('2d');
+  new Chart(freqCtx, {
+    type: 'line',
+    data: {
+      labels: ['Dez', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+      datasets: [
+        {
+          label: 'Média da turma',
+          data: [91, 89, 90, 88, 91, 91],
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37,99,235,0.08)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#2563eb',
+          fill: true,
+          tension: 0.4,
+        },
+        {
+          label: 'Grupo de risco',
+          data: [78, 72, 70, 68, 73, 71],
+          borderColor: '#dc2626',
+          backgroundColor: 'rgba(220,38,38,0.06)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#dc2626',
+          fill: true,
+          tension: 0.4,
+          borderDash: [5, 3],
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          min: 60,
+          max: 100,
+          ticks: {
+            font: { size: 11 },
+            color: '#9999a8',
+            callback: v => v + '%'
+          },
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        },
+        x: {
+          ticks: { font: { size: 11 }, color: '#9999a8' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

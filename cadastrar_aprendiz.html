@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastrar Aprendiz — AprendizAtivo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #f0f0f3;
+      --border: rgba(0,0,0,0.08);
+      --text: #111112;
+      --text2: #6b6b7a;
+      --text3: #9999a8;
+      --accent: #1a1a2e;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-text: #1d4ed8;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --green-text: #15803d;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --amber-text: #b45309;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --red-text: #b91c1c;
+      --purple: #7c3aed;
+      --purple-bg: #f5f3ff;
+      --purple-text: #6d28d9;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+      --sidebar-w: 240px;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--accent);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      padding: 0 0 1.5rem;
+    }
+
+    .sidebar-logo {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.01em;
+      display: block;
+    }
+    .sidebar-logo small {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      font-weight: 400;
+    }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 1rem 0.5rem 0.4rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-xs);
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-item svg { flex-shrink: 0; opacity: 0.7; }
+    .nav-item.active svg { opacity: 1; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 99px;
+      font-family: var(--mono);
+    }
+    .nav-badge.amber { background: var(--amber); }
+
+    .sidebar-footer {
+      padding: 0 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1rem;
+    }
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-xs);
+    }
+    .avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: #fff;
+      flex-shrink: 0;
+    }
+    .sidebar-user-info span { display: block; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8); }
+    .sidebar-user-info small { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-left { display: flex; flex-direction: column; }
+    .topbar-left h1 { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .topbar-left span { font-size: 12px; color: var(--text2); }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    .topbar-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 0.875rem; height: 32px;
+      border-radius: var(--radius-xs);
+      font-size: 12px; font-weight: 500;
+      cursor: pointer; border: none;
+      font-family: var(--font);
+      transition: background 0.15s;
+    }
+    .topbar-btn.ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .topbar-btn.ghost:hover { background: var(--surface2); }
+    .topbar-btn.primary { background: var(--accent); color: #fff; }
+    .topbar-btn.primary:hover { background: #2a2a4a; }
+
+    .period-select {
+      font-family: var(--font);
+      font-size: 12px;
+      color: var(--text2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 0 0.75rem;
+      height: 32px;
+      background: var(--surface);
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ── Content ── */
+    .content { padding: 1.75rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── Alert banner ── */
+    .alert-banner {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 13px;
+      color: #92400e;
+    }
+    .alert-banner svg { flex-shrink: 0; }
+    .alert-banner strong { font-weight: 600; }
+
+    /* ── KPI Grid ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.125rem 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .kpi-header { display: flex; align-items: center; justify-content: space-between; }
+    .kpi-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+    .kpi-icon { width: 28px; height: 28px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; }
+    .kpi-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .kpi-icon.green { background: var(--green-bg); color: var(--green); }
+    .kpi-icon.amber { background: var(--amber-bg); color: var(--amber); }
+    .kpi-icon.red { background: var(--red-bg); color: var(--red); }
+    .kpi-icon.purple { background: var(--purple-bg); color: var(--purple); }
+    .kpi-value { font-size: 28px; font-weight: 600; color: var(--text); letter-spacing: -0.03em; font-family: var(--mono); line-height: 1.1; }
+    .kpi-sub { font-size: 11px; color: var(--text3); }
+    .kpi-delta {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 500;
+      padding: 2px 6px; border-radius: 99px;
+    }
+    .kpi-delta.up { background: var(--green-bg); color: var(--green-text); }
+    .kpi-delta.down { background: var(--red-bg); color: var(--red-text); }
+    .kpi-delta.neutral { background: var(--surface2); color: var(--text2); }
+
+    /* ── Row: charts + risk ── */
+    .row-2col { display: grid; grid-template-columns: 1fr 340px; gap: 1rem; }
+    .row-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .card-subtitle { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .card-action { font-size: 11px; color: var(--blue); cursor: pointer; font-weight: 500; }
+
+    .chart-wrap { position: relative; height: 200px; }
+
+    /* ── Risk list ── */
+    .risk-list { display: flex; flex-direction: column; gap: 0.625rem; }
+    .risk-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .risk-item:hover { border-color: rgba(0,0,0,0.18); }
+    .risk-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .risk-dot.critical { background: var(--red); }
+    .risk-dot.high { background: var(--amber); }
+    .risk-dot.medium { background: var(--blue); }
+    .risk-info { flex: 1; min-width: 0; }
+    .risk-name { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .risk-detail { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .risk-score {
+      font-size: 12px; font-weight: 600;
+      font-family: var(--mono);
+      padding: 2px 7px; border-radius: 99px;
+    }
+    .risk-score.critical { background: var(--red-bg); color: var(--red-text); }
+    .risk-score.high { background: var(--amber-bg); color: var(--amber-text); }
+    .risk-score.medium { background: var(--blue-bg); color: var(--blue-text); }
+
+    /* ── Progress bar ── */
+    .progress-bar { height: 5px; border-radius: 99px; background: var(--surface2); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+    .progress-fill.green { background: var(--green); }
+    .progress-fill.amber { background: var(--amber); }
+    .progress-fill.red { background: var(--red); }
+    .progress-fill.blue { background: var(--blue); }
+    .progress-fill.purple { background: var(--purple); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--surface2); }
+
+    .tag {
+      display: inline-flex; align-items: center;
+      font-size: 10px; font-weight: 500;
+      padding: 2px 7px; border-radius: 99px;
+      white-space: nowrap;
+    }
+    .tag.green { background: var(--green-bg); color: var(--green-text); }
+    .tag.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .tag.red { background: var(--red-bg); color: var(--red-text); }
+    .tag.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .tag.purple { background: var(--purple-bg); color: var(--purple-text); }
+    .tag.gray { background: var(--surface2); color: var(--text2); }
+
+    /* ── Pais section ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding-bottom: 0.1rem;
+      border-bottom: 2px solid var(--purple);
+      display: inline-block;
+      margin-bottom: -0.25rem;
+    }
+
+    .parent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .contact-item:last-child { border-bottom: none; }
+    .contact-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600;
+      flex-shrink: 0;
+    }
+    .contact-avatar.purple { background: var(--purple-bg); color: var(--purple-text); }
+    .contact-avatar.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .contact-avatar.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .contact-info span { display: block; font-size: 12px; font-weight: 500; }
+    .contact-info small { font-size: 11px; color: var(--text3); }
+    .contact-status { margin-left: auto; }
+
+    .engagement-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .engagement-row:last-child { border-bottom: none; }
+    .engagement-label { font-size: 12px; color: var(--text2); min-width: 140px; }
+    .engagement-bar-wrap { flex: 1; }
+    .engagement-val { font-size: 12px; font-weight: 500; font-family: var(--mono); min-width: 30px; text-align: right; }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row-label { color: var(--text2); }
+    .stat-row-val { font-weight: 600; font-family: var(--mono); }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .row-2col { grid-template-columns: 1fr; }
+      .parent-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .row-3col { grid-template-columns: 1fr; }
+    }
+
+    /* ── View switching ── */
+    .view { display: none; }
+    .view.active { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── Aprendizes Page ── */
+    .search-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .search-panel-title {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      margin-bottom: 1rem;
+    }
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 200px 200px auto auto;
+      gap: 0.75rem;
+      align-items: end;
+    }
+    .search-field { display: flex; flex-direction: column; gap: 4px; }
+    .search-field label { font-size: 11px; font-weight: 500; color: var(--text2); }
+    .search-input {
+      font-family: var(--font);
+      font-size: 13px;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 0 0.75rem;
+      height: 34px;
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .search-select {
+      font-family: var(--font);
+      font-size: 13px;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 0 0.75rem;
+      height: 34px;
+      background: var(--surface);
+      outline: none;
+      cursor: pointer;
+    }
+    .btn-search {
+      height: 34px; padding: 0 1rem;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius-xs);
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn-search:hover { background: #2a2a4a; }
+    .btn-clear {
+      height: 34px; padding: 0 1rem;
+      background: transparent; color: var(--text2);
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn-clear:hover { background: var(--surface2); }
+
+    .aprendiz-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .aprendiz-table-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .aprendiz-table-header .card-title { margin-bottom: 2px; }
+    .aprendiz-count {
+      font-size: 11px; font-weight: 600;
+      font-family: var(--mono);
+      background: var(--blue-bg); color: var(--blue-text);
+      padding: 2px 8px; border-radius: 99px;
+    }
+    .aprendiz-row {
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .aprendiz-row:hover td { background: var(--surface2); }
+    .aprendiz-row:active td { background: #e8edf8; }
+    .hint-dblclick {
+      font-size: 10px; color: var(--text3);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .name-cell { display: flex; align-items: center; gap: 10px; }
+    .name-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; flex-shrink: 0;
+    }
+    .name-avatar.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .name-avatar.green { background: var(--green-bg); color: var(--green-text); }
+    .name-avatar.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .name-avatar.purple { background: var(--purple-bg); color: var(--purple-text); }
+    .name-avatar.red { background: var(--red-bg); color: var(--red-text); }
+    .name-primary { font-size: 12px; font-weight: 600; color: var(--text); }
+    .name-secondary { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .no-results {
+      padding: 3rem 1.5rem; text-align: center;
+      color: var(--text3); font-size: 13px;
+    }
+    .no-results strong { display: block; font-size: 14px; color: var(--text2); margin-bottom: 4px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 1rem;
+      flex-shrink: 0;
+    }
+    .modal-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+    .modal-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .modal-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .modal-close {
+      margin-left: auto;
+      width: 30px; height: 30px; border-radius: var(--radius-xs);
+      border: 1px solid var(--border); background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text2); transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .modal-close:hover { background: var(--surface2); }
+
+    .modal-body {
+      padding: 1.25rem 1.5rem;
+      overflow-y: auto;
+      flex: 1;
+      display: flex; flex-direction: column; gap: 1.25rem;
+    }
+
+    .modal-section-title {
+      font-size: 10px; font-weight: 600; color: var(--text2);
+      letter-spacing: 0.07em; text-transform: uppercase;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+    }
+    .modal-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .modal-field { display: flex; flex-direction: column; gap: 2px; }
+    .modal-field label { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+    .modal-field span { font-size: 12px; color: var(--text); font-weight: 500; }
+
+    .evolution-textarea {
+      width: 100%; min-height: 80px; resize: vertical;
+      font-family: var(--font); font-size: 13px; color: var(--text);
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      padding: 0.625rem 0.75rem; background: var(--bg);
+      outline: none; transition: border-color 0.15s;
+      line-height: 1.5;
+    }
+    .evolution-textarea:focus { border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .btn-save-nota {
+      height: 32px; padding: 0 1.25rem;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius-xs);
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+      align-self: flex-end;
+      margin-top: 0.5rem;
+    }
+    .btn-save-nota:hover { background: #2a2a4a; }
+
+    .evolution-list { display: flex; flex-direction: column; gap: 0.625rem; margin-top: 0.5rem; }
+    .evolution-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 0.625rem 0.875rem;
+    }
+    .evolution-item-meta {
+      font-size: 10px; color: var(--text3); font-family: var(--mono);
+      margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+    }
+    .evolution-item-meta::before {
+      content: '';
+      display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--blue); flex-shrink: 0;
+    }
+    .evolution-item-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+    .evolution-empty {
+      font-size: 12px; color: var(--text3);
+      padding: 0.75rem 0; text-align: center;
+      border: 1px dashed var(--border); border-radius: var(--radius-xs);
+    }
+
+    /* ── View toggle ── */
+    .view { display: none; }
+    .view.active { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── Alocação Panel ── */
+    .alloc-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .alloc-kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.125rem 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .alloc-kpi-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .alloc-kpi-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .alloc-kpi-icon.green { background: var(--green-bg); color: var(--green); }
+    .alloc-kpi-icon.amber { background: var(--amber-bg); color: var(--amber); }
+    .alloc-kpi-body { display: flex; flex-direction: column; gap: 2px; }
+    .alloc-kpi-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+    .alloc-kpi-value { font-size: 30px; font-weight: 600; letter-spacing: -0.03em; font-family: var(--mono); color: var(--text); line-height: 1.1; }
+
+    .alloc-banner {
+      background: var(--green-bg);
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 13px;
+      color: var(--green-text);
+    }
+    .alloc-banner svg { flex-shrink: 0; }
+    .alloc-banner strong { font-weight: 600; }
+
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1rem;
+    }
+    .filter-pill {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .filter-pill:hover { background: var(--surface2); }
+    .filter-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .rank-pos {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text2);
+      min-width: 28px;
+    }
+    .rank-pos.top { color: var(--accent); }
+
+    .btn-ghost-blue {
+      background: transparent;
+      border: none;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font);
+      padding: 3px 0;
+      transition: color 0.15s;
+    }
+    .btn-ghost-blue:hover { color: var(--blue-text); text-decoration: underline; }
+
+    .btn-direcionar {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--font);
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn-direcionar:hover { background: var(--green-text); }
+
+    .score-cell {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .score-info {
+      color: var(--text3);
+      font-size: 11px;
+      cursor: default;
+    }
+
+    /* ── Priority Modal ── */
+    .priority-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .priority-modal-overlay.open { opacity: 1; pointer-events: all; }
+    .priority-modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 440px;
+      padding: 1.5rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.2s;
+    }
+    .priority-modal-overlay.open .priority-modal { transform: translateY(0) scale(1); }
+    .priority-modal-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .priority-modal-sub { font-size: 12px; color: var(--text2); margin-top: -0.5rem; }
+    .priority-modal-label {
+      font-size: 11px; font-weight: 500; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 4px; display: block;
+    }
+    .priority-modal-input {
+      width: 100%;
+      font-family: var(--font);
+      font-size: 13px;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .priority-modal-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); background: var(--surface); }
+    .priority-modal-textarea {
+      width: 100%; min-height: 80px; resize: vertical;
+      font-family: var(--font); font-size: 13px; color: var(--text);
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      padding: 0.5rem 0.75rem; background: var(--bg);
+      outline: none; transition: border-color 0.15s; line-height: 1.5;
+    }
+    .priority-modal-textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); background: var(--surface); }
+    .priority-modal-error {
+      font-size: 11px; color: var(--red);
+      display: none; margin-top: -0.5rem;
+    }
+    .priority-modal-error.show { display: block; }
+    .priority-modal-footer {
+      display: flex; gap: 0.5rem; justify-content: flex-end;
+    }
+
+    /* ══════════════════════════════════════════
+       CADASTRO MULTI-STEP STYLES
+    ══════════════════════════════════════════ */
+
+    /* Stepper */
+    .mf-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 2rem;
+    }
+    .mf-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      z-index: 1;
+    }
+    .mf-step-bubble {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
+      color: var(--text3);
+      transition: border-color 0.3s, background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.25s;
+      position: relative;
+    }
+    .mf-step.active .mf-step-bubble {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(26,26,46,0.1);
+      transform: scale(1.08);
+    }
+    .mf-step.done .mf-step-bubble {
+      border-color: var(--green);
+      background: var(--green);
+      color: transparent;
+      font-size: 0;
+    }
+    .mf-step.done .mf-step-bubble::after {
+      content: '';
+      display: block;
+      width: 11px; height: 7px;
+      border-left: 2.5px solid #fff;
+      border-bottom: 2.5px solid #fff;
+      transform: rotate(-45deg) translate(0px, -1px);
+      flex-shrink: 0;
+    }
+    .mf-step-label {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text3);
+      text-align: center;
+      transition: color 0.25s;
+      white-space: nowrap;
+    }
+    .mf-step.active .mf-step-label { color: var(--accent); font-weight: 600; }
+    .mf-step.done .mf-step-label { color: var(--green-text); }
+
+    .mf-connector {
+      width: 60px; height: 2px;
+      background: var(--border);
+      margin-bottom: 22px;
+      transition: background 0.4s;
+      position: relative;
+    }
+    .mf-connector.done { background: var(--green); }
+    .mf-connector-fill {
+      position: absolute; top: 0; left: 0; height: 100%;
+      background: var(--green);
+      width: 0;
+      transition: width 0.5s ease;
+    }
+
+    /* Step panels */
+    .mf-panel {
+      display: none;
+      animation: mfIn 0.3s ease forwards;
+    }
+    .mf-panel.active { display: flex; flex-direction: column; gap: 1.25rem; }
+    .mf-panel.exit { animation: mfOut 0.2s ease forwards; }
+
+    @keyframes mfIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes mfOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-20px); }
+    }
+    @keyframes mfInBack {
+      from { opacity: 0; transform: translateX(-20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Form card shared */
+    .mf-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.2s;
+    }
+    .mf-card:focus-within { box-shadow: var(--shadow-md); }
+
+    .mf-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .mf-section-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .mf-section-icon.blue   { background: var(--blue-bg);   color: var(--blue); }
+    .mf-section-icon.amber  { background: var(--amber-bg);  color: var(--amber); }
+    .mf-section-icon.purple { background: var(--purple-bg); color: var(--purple); }
+    .mf-section-icon.green  { background: var(--green-bg);  color: var(--green); }
+    .mf-section-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .mf-section-sub   { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    /* Field grid */
+    .mf-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .mf-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 180px;
+    }
+    .mf-field.full { flex-basis: 100%; min-width: 100%; }
+    .mf-field.w-sm { flex: 0 0 140px; min-width: 140px; max-width: 180px; }
+
+    .mf-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text2);
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mf-req { color: var(--red); font-size: 12px; }
+    .mf-badge-auto {
+      font-size: 9px; font-weight: 500;
+      color: var(--blue-text); background: var(--blue-bg);
+      padding: 1px 6px; border-radius: 99px;
+    }
+
+    .mf-input {
+      height: 36px;
+      padding: 0 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      width: 100%;
+    }
+    .mf-input::placeholder { color: var(--text3); }
+    .mf-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+    }
+    .mf-input.valid   { border-color: var(--green); box-shadow: 0 0 0 3px rgba(22,163,74,0.07); }
+    .mf-input.invalid { border-color: var(--red);   box-shadow: 0 0 0 3px rgba(220,38,38,0.07); }
+    .mf-input.readonly-auto {
+      background: var(--surface2); color: var(--text2); cursor: default;
+    }
+    .mf-input.auto-filled {
+      background: #f0fdf4; border-color: rgba(22,163,74,0.3);
+      color: var(--text); font-style: normal;
+    }
+
+    .mf-textarea {
+      padding: 0.625rem 0.75rem;
+      min-height: 80px; resize: vertical; line-height: 1.6;
+      height: auto;
+    }
+
+    .mf-select-wrap { position: relative; }
+    .mf-select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 2rem; }
+    .mf-select-arrow {
+      position: absolute; right: 0.75rem; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none; color: var(--text3);
+    }
+
+    .mf-msg {
+      font-size: 11px; color: var(--text3);
+      min-height: 15px; transition: color 0.15s;
+    }
+    .mf-msg.err { color: var(--red-text); }
+    .mf-msg.ok  { color: var(--green-text); }
+
+    /* CEP Spinner */
+    .cep-rel { position: relative; }
+    .cep-spin-wrap {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%);
+      display: none;
+    }
+    .cep-spin-wrap.show { display: flex; }
+    .mini-spin {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin360 0.7s linear infinite;
+    }
+    @keyframes spin360 { to { transform: rotate(360deg); } }
+
+    /* Nav buttons */
+    .mf-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.25rem;
+    }
+    .btn-mf-back {
+      display: flex; align-items: center; gap: 6px;
+      height: 36px; padding: 0 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 12px; font-weight: 500;
+      color: var(--text2); font-family: var(--font);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-mf-back:hover { background: var(--surface2); }
+
+    .btn-mf-next {
+      display: flex; align-items: center; gap: 7px;
+      height: 36px; padding: 0 1.25rem;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 1px 4px rgba(26,26,46,0.18);
+    }
+    .btn-mf-next:hover { background: #2a2a4a; box-shadow: 0 2px 8px rgba(26,26,46,0.25); }
+    .btn-mf-next:active { transform: scale(0.98); }
+    .btn-mf-next.loading { opacity: 0.7; pointer-events: none; }
+    .btn-mf-next.success { background: var(--green); }
+
+    /* Summary card */
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .summary-header {
+      display: flex; align-items: center; gap: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .summary-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; flex-shrink: 0;
+    }
+    .summary-name { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+    .summary-sub  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .summary-item { display: flex; flex-direction: column; gap: 3px; }
+    .summary-item-label {
+      font-size: 10px; font-weight: 500; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .summary-item-val { font-size: 13px; font-weight: 500; color: var(--text); }
+
+    /* Success overlay */
+    .mf-success-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    .mf-success-overlay.show { display: flex; animation: mfIn 0.4s ease; }
+    .mf-success-circle {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--green-bg);
+      border: 2px solid rgba(22,163,74,0.2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green);
+      animation: popBig 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popBig {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+    .mf-success-title { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+    .mf-success-sub   { font-size: 13px; color: var(--text2); }
+
+    /* Shake */
+    @keyframes shakeX {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-5px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+  </style>
+
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>AprendizAtivo</span>
+    <small>Prevenção de Evasão</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Visão Geral</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="aprendizes.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      Aprendizes
+      <span class="nav-badge">14</span>
+    </a>
+    <a href="cadastrar_aprendiz.html" class="nav-item active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      Cadastrar Aprendiz
+    </a>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Pais / Responsáveis
+      <span class="nav-badge amber">3</span>
+    </a>
+    <div class="nav-section-label">Monitoramento</div>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Riscos
+    </a>
+    <div class="nav-section-label">Operacional</div>
+    <a href="vagas_alocacao.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+      Vagas e Alocação
+    </a>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda
+    </a>
+    <div class="nav-section-label">Configurações</div>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Configurações
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar">MO</div>
+      <div class="sidebar-user-info">
+        <span>Maria Oliveira</span>
+        <small>Técnica de Referência</small>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Cadastrar Aprendiz</h1>
+      <span>Programa Descubra · Pirapora - MG</span>
+    </div>
+    <div class="topbar-right">
+      <a href="aprendizes.html" class="topbar-btn ghost">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Voltar para Aprendizes
+      </a>
+    </div>
+  </div>
+
+  <div class="content" style="max-width:860px; margin-left:auto; margin-right:auto; width:100%;">
+  <div class="content" id="view-cadastro" style="max-width: 860px; margin-left: auto; margin-right: auto; width: 100%;">
+
+    <!-- Page title -->
+    <div>
+      <div style="font-size:18px; font-weight:600; color:var(--text); letter-spacing:-0.02em;">Novo Cadastro</div>
+      <div style="font-size:12px; color:var(--text2); margin-top:3px;">Preencha as etapas abaixo. Campos com <span style="color:var(--red)">*</span> são obrigatórios.</div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="mf-stepper" id="mf-stepper">
+      <div class="mf-step active" id="mf-step-dot-1" onclick="mfGoToStep(1)" style="cursor:pointer;">
+        <div class="mf-step-bubble">1</div>
+        <div class="mf-step-label">Dados Pessoais</div>
+      </div>
+      <div class="mf-connector" id="mf-conn-1"><div class="mf-connector-fill" id="mf-conn-fill-1"></div></div>
+      <div class="mf-step" id="mf-step-dot-2" onclick="mfGoToStep(2)" style="cursor:pointer;">
+        <div class="mf-step-bubble">2</div>
+        <div class="mf-step-label">Vulnerabilidade</div>
+      </div>
+      <div class="mf-connector" id="mf-conn-2"><div class="mf-connector-fill" id="mf-conn-fill-2"></div></div>
+      <div class="mf-step" id="mf-step-dot-3" onclick="mfGoToStep(3)" style="cursor:pointer;">
+        <div class="mf-step-bubble">3</div>
+        <div class="mf-step-label">Unidade Responsável</div>
+      </div>
+      <div class="mf-connector" id="mf-conn-3"><div class="mf-connector-fill" id="mf-conn-fill-3"></div></div>
+      <div class="mf-step" id="mf-step-dot-4" onclick="mfGoToStep(4)" style="cursor:pointer;">
+        <div class="mf-step-bubble">4</div>
+        <div class="mf-step-label">Resumo</div>
+      </div>
+    </div>
+
+    <!-- ── STEP 1: Dados Pessoais ── -->
+    <div class="mf-panel active" id="mf-panel-1">
+      <div class="mf-card">
+        <div class="mf-section-header">
+          <div class="mf-section-icon blue">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div class="mf-section-title">Etapa 1 — Dados Pessoais</div>
+            <div class="mf-section-sub">Identificação do jovem aprendiz</div>
+          </div>
+        </div>
+        <div class="mf-grid">
+          <div class="mf-field full">
+            <label class="mf-label" for="mf-nome">Nome Completo <span class="mf-req">*</span></label>
+            <input class="mf-input" id="mf-nome" type="text" placeholder="Nome e sobrenome completos" autocomplete="name"/>
+            <span class="mf-msg" id="mf-msg-nome"></span>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-cpf">CPF <span class="mf-req">*</span></label>
+            <input class="mf-input" id="mf-cpf" type="text" placeholder="000.000.000-00" maxlength="14" inputmode="numeric"/>
+            <span class="mf-msg" id="mf-msg-cpf"></span>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-tel">Telefone / WhatsApp <span class="mf-req">*</span></label>
+            <input class="mf-input" id="mf-tel" type="text" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric"/>
+            <span class="mf-msg" id="mf-msg-tel"></span>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-nasc">Data de Nascimento <span class="mf-req">*</span></label>
+            <input class="mf-input" id="mf-nasc" type="date"/>
+            <span class="mf-msg" id="mf-msg-nasc"></span>
+          </div>
+          <div class="mf-field w-sm">
+            <label class="mf-label" for="mf-idade">Idade <span class="mf-badge-auto">Automático</span></label>
+            <input class="mf-input readonly-auto" id="mf-idade" type="text" placeholder="— anos" readonly tabindex="-1"/>
+          </div>
+          <div class="mf-field full">
+            <label class="mf-label" for="mf-esc">Escolaridade <span class="mf-req">*</span></label>
+            <div class="mf-select-wrap">
+              <select class="mf-input mf-select" id="mf-esc">
+                <option value="">Selecione...</option>
+                <option>1º Ano - Ensino Médio</option>
+                <option>2º Ano - Ensino Médio</option>
+                <option>3º Ano - Ensino Médio</option>
+              </select>
+              <svg class="mf-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <span class="mf-msg" id="mf-msg-esc"></span>
+          </div>
+        </div>
+
+        <!-- Endereço (movido para Dados Pessoais) -->
+        <div style="margin-top:1.25rem; padding-top:1.25rem; border-top:1px solid var(--border);">
+          <div style="display:flex; align-items:center; gap:0.625rem; margin-bottom:1rem;">
+            <div class="mf-section-icon amber" style="width:28px; height:28px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <div style="font-size:12px; font-weight:600; color:var(--text);">Endereço</div>
+              <div style="font-size:11px; color:var(--text3);">CEP preenche rua, bairro, cidade e estado automaticamente</div>
+            </div>
+          </div>
+          <div class="mf-grid">
+            <div class="mf-field w-sm">
+              <label class="mf-label" for="mf-cep">CEP <span class="mf-req">*</span></label>
+              <div class="cep-rel">
+                <input class="mf-input" id="mf-cep" type="text" placeholder="00000-000" maxlength="9" inputmode="numeric"/>
+                <div class="cep-spin-wrap" id="mf-cep-spin"><div class="mini-spin"></div></div>
+              </div>
+              <span class="mf-msg" id="mf-msg-cep"></span>
+            </div>
+            <div class="mf-field" style="flex:2;">
+              <label class="mf-label" for="mf-rua">Rua / Logradouro <span class="mf-badge-auto">Automático</span></label>
+              <input class="mf-input readonly-auto" id="mf-rua" type="text" placeholder="Preenchido pelo CEP" readonly/>
+            </div>
+            <div class="mf-field w-sm">
+              <label class="mf-label" for="mf-num">Número</label>
+              <input class="mf-input" id="mf-num" type="text" placeholder="Nº"/>
+            </div>
+            <div class="mf-field">
+              <label class="mf-label" for="mf-bairro">Bairro <span class="mf-badge-auto">Automático</span></label>
+              <input class="mf-input readonly-auto" id="mf-bairro" type="text" placeholder="Preenchido pelo CEP" readonly/>
+            </div>
+            <div class="mf-field">
+              <label class="mf-label" for="mf-cidade">Cidade <span class="mf-badge-auto">Automático</span></label>
+              <input class="mf-input readonly-auto" id="mf-cidade" type="text" placeholder="Preenchido pelo CEP" readonly/>
+            </div>
+            <div class="mf-field w-sm">
+              <label class="mf-label" for="mf-estado">UF <span class="mf-badge-auto">Automático</span></label>
+              <input class="mf-input readonly-auto" id="mf-estado" type="text" placeholder="UF" readonly/>
+            </div>
+            <div class="mf-field" style="flex:2;">
+              <label class="mf-label" for="mf-comp">Complemento</label>
+              <input class="mf-input" id="mf-comp" type="text" placeholder="Apto, bloco, referência…"/>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mf-nav">
+        <span></span>
+        <button class="btn-mf-next" onclick="mfNext(1)">
+          Próximo
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Vulnerabilidade e Acompanhamento ── -->
+    <div class="mf-panel" id="mf-panel-2">
+      <div class="mf-card">
+        <div class="mf-section-header">
+          <div class="mf-section-icon purple">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div>
+            <div class="mf-section-title">Etapa 2 — Vulnerabilidade e Acompanhamento</div>
+            <div class="mf-section-sub">Instituição, motivo do ingresso e status no programa</div>
+          </div>
+        </div>
+        <div class="mf-grid">
+          <div class="mf-field">
+            <label class="mf-label" for="mf-inst">Instituição Responsável <span class="mf-req">*</span></label>
+            <div class="mf-select-wrap">
+              <select class="mf-input mf-select" id="mf-inst">
+                <option value="">Selecione...</option>
+                <option value="CRAS">CRAS</option>
+                <option value="CREAS">CREAS</option>
+                <option value="Acolhimento">Acolhimento</option>
+                <option value="Conselho Tutelar">Conselho Tutelar</option>
+                <option value="Outros">Outros</option>
+              </select>
+              <svg class="mf-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <span class="mf-msg" id="mf-msg-inst"></span>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-tecnico">Técnico de Referência</label>
+            <input class="mf-input" id="mf-tecnico" type="text" placeholder="Nome do técnico responsável"/>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-motivo">Motivo do Ingresso <span class="mf-req">*</span></label>
+            <div class="mf-select-wrap">
+              <select class="mf-input mf-select" id="mf-motivo">
+                <option value="">Selecione...</option>
+                <option value="Vulnerabilidade Social">Vulnerabilidade Social</option>
+                <option value="Medida Socioeducativa">Medida Socioeducativa</option>
+                <option value="Baixa Renda">Baixa Renda</option>
+                <option value="Situação Familiar">Situação Familiar</option>
+                <option value="Outros">Outros</option>
+              </select>
+              <svg class="mf-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <span class="mf-msg" id="mf-msg-motivo"></span>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-status">Status <span class="mf-req">*</span></label>
+            <div class="mf-select-wrap">
+              <select class="mf-input mf-select" id="mf-status">
+                <option value="">Selecione...</option>
+                <option value="Em Espera">Em Espera</option>
+                <option value="Em Curso">Em Curso</option>
+                <option value="Empregado">Empregado</option>
+                <option value="Desligado">Desligado</option>
+              </select>
+              <svg class="mf-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <span class="mf-msg" id="mf-msg-status"></span>
+          </div>
+          <div class="mf-field full">
+            <label class="mf-label" for="mf-obs">Observações</label>
+            <textarea class="mf-input mf-textarea" id="mf-obs" placeholder="Informações adicionais relevantes para o acompanhamento…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="mf-nav">
+        <button class="btn-mf-back" onclick="mfBack(2)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar
+        </button>
+        <button class="btn-mf-next" onclick="mfNext(2)">
+          Próximo
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ── STEP 3: Unidade Responsável ── -->
+    <div class="mf-panel" id="mf-panel-3">
+      <div class="mf-card">
+        <div class="mf-section-header">
+          <div class="mf-section-icon green">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div>
+            <div class="mf-section-title">Etapa 3 — Unidade Responsável</div>
+            <div class="mf-section-sub">Dados da unidade que acompanha o jovem</div>
+          </div>
+        </div>
+        <div class="mf-grid">
+          <div class="mf-field">
+            <label class="mf-label" for="mf-unidade-tipo">Tipo de Unidade <span class="mf-req">*</span></label>
+            <div class="mf-select-wrap">
+              <select class="mf-input mf-select" id="mf-unidade-tipo">
+                <option value="">Selecione...</option>
+                <option value="CRAS">CRAS</option>
+                <option value="CREAS">CREAS</option>
+                <option value="Casa de Acolhimento">Casa de Acolhimento</option>
+                <option value="Conselho Tutelar">Conselho Tutelar</option>
+                <option value="Escola Parceira">Escola Parceira</option>
+                <option value="Outros">Outros</option>
+              </select>
+              <svg class="mf-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <span class="mf-msg" id="mf-msg-unidade-tipo"></span>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-unidade-nome">Nome da Unidade <span class="mf-req">*</span></label>
+            <input class="mf-input" id="mf-unidade-nome" type="text" placeholder="Ex: CRAS Pirapora Centro"/>
+            <span class="mf-msg" id="mf-msg-unidade-nome"></span>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-unidade-responsavel">Responsável pela Unidade</label>
+            <input class="mf-input" id="mf-unidade-responsavel" type="text" placeholder="Nome do coordenador ou gestor"/>
+          </div>
+          <div class="mf-field">
+            <label class="mf-label" for="mf-unidade-tel">Telefone da Unidade</label>
+            <input class="mf-input" id="mf-unidade-tel" type="text" placeholder="(00) 0000-0000" maxlength="15" inputmode="numeric"/>
+          </div>
+          <div class="mf-field full">
+            <label class="mf-label" for="mf-unidade-end">Endereço da Unidade</label>
+            <input class="mf-input" id="mf-unidade-end" type="text" placeholder="Rua, número, bairro"/>
+          </div>
+          <div class="mf-field full">
+            <label class="mf-label" for="mf-unidade-obs">Observações da Unidade</label>
+            <textarea class="mf-input mf-textarea" id="mf-unidade-obs" placeholder="Informações adicionais sobre o vínculo com a unidade…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="mf-nav">
+        <button class="btn-mf-back" onclick="mfBack(3)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar
+        </button>
+        <button class="btn-mf-next" onclick="mfNext(3)">
+          Ver Resumo
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: Resumo Final ── -->
+    <div class="mf-panel" id="mf-panel-4">
+      <!-- Success overlay (shown after finalize) -->
+      <div class="mf-success-overlay" id="mf-success">
+        <div class="mf-success-circle">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div class="mf-success-title">Cadastro realizado com sucesso!</div>
+          <div class="mf-success-sub">O aprendiz foi registrado no sistema e já aparece na lista.</div>
+        </div>
+        <button class="btn-mf-next" onclick="mfReset()" style="margin-top:0.5rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Novo Cadastro
+        </button>
+      </div>
+
+      <!-- Summary content (hidden after success) -->
+      <div id="mf-summary-content">
+        <div class="summary-card">
+          <div class="summary-header">
+            <div class="summary-avatar" id="sum-avatar">—</div>
+            <div>
+              <div class="summary-name" id="sum-nome">—</div>
+              <div class="summary-sub" id="sum-sub">—</div>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <div class="summary-item-label">Idade</div>
+              <div class="summary-item-val" id="sum-idade">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">CPF</div>
+              <div class="summary-item-val" id="sum-cpf" style="font-family:var(--mono); font-size:12px;">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Telefone</div>
+              <div class="summary-item-val" id="sum-tel" style="font-family:var(--mono); font-size:12px;">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Instituição Responsável</div>
+              <div class="summary-item-val" id="sum-inst">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Técnico de Referência</div>
+              <div class="summary-item-val" id="sum-tecnico">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Motivo do Ingresso</div>
+              <div class="summary-item-val" id="sum-motivo">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Status</div>
+              <div class="summary-item-val" id="sum-status">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Escolaridade</div>
+              <div class="summary-item-val" id="sum-esc">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Endereço</div>
+              <div class="summary-item-val" id="sum-end" style="font-size:12px;">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Unidade Responsável</div>
+              <div class="summary-item-val" id="sum-unidade">—</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Responsável da Unidade</div>
+              <div class="summary-item-val" id="sum-unidade-resp">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="mf-nav">
+          <button class="btn-mf-back" onclick="mfBack(3)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Voltar e Editar
+          </button>
+          <button class="btn-mf-next" id="btn-finalizar" onclick="mfFinalize()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Finalizar Cadastro
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /view-cadastro -->
+</main>
+
+<script>
+  //  MULTI-STEP FORM — Cadastro de Aprendiz
+  // ═══════════════════════════════════════════════════════════════
+
+  let mfCurrentStep = 1;
+  const MF_TOTAL = 4;
+
+  // ── Helpers ──────────────────────────────────────────────────────
+  function mfVal(id) { return (document.getElementById(id) || {}).value || ''; }
+
+  function mfSetMsg(msgId, text, type) {
+    const el = document.getElementById(msgId);
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'mf-msg' + (type ? ' ' + type : '');
+  }
+
+  function mfMark(inputId, valid) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.classList.toggle('valid',   valid);
+    el.classList.toggle('invalid', !valid);
+  }
+
+  function mfIsValidCPF(cpf) {
+    const c = cpf.replace(/\D/g, '');
+    if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+    let s = 0;
+    for (let i = 0; i < 9; i++) s += +c[i] * (10 - i);
+    let r = (s * 10) % 11; if (r >= 10) r = 0;
+    if (r !== +c[9]) return false;
+    s = 0;
+    for (let i = 0; i < 10; i++) s += +c[i] * (11 - i);
+    r = (s * 10) % 11; if (r >= 10) r = 0;
+    return r === +c[10];
+  }
+
+  function mfMaskCPF(v) {
+    v = v.replace(/\D/g,'').slice(0,11);
+    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+    return v;
+  }
+
+  function mfMaskTel(v) {
+    v = v.replace(/\D/g,'').slice(0,11);
+    if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+    else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
+    else if (v.length > 0) v = '(' + v;
+    return v;
+  }
+
+  function mfMaskCEP(v) {
+    v = v.replace(/\D/g,'').slice(0,8);
+    if (v.length > 5) v = v.replace(/(\d{5})(\d{1,3})/,'$1-$2');
+    return v;
+  }
+
+  function mfCalcIdade(dob) {
+    if (!dob) return '';
+    const d = new Date(dob), t = new Date();
+    let age = t.getFullYear() - d.getFullYear();
+    const m = t.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && t.getDate() < d.getDate())) age--;
+    return age >= 0 ? age + ' anos' : '';
+  }
+
+  // ── Input masks & live calc ───────────────────────────────────────
+  document.getElementById('mf-cpf').addEventListener('input', function() {
+    this.value = mfMaskCPF(this.value);
+    this.classList.remove('valid','invalid');
+  });
+
+  document.getElementById('mf-tel').addEventListener('input', function() {
+    this.value = mfMaskTel(this.value);
+  });
+
+  document.getElementById('mf-nasc').addEventListener('change', function() {
+    const idade = mfCalcIdade(this.value);
+    document.getElementById('mf-idade').value = idade;
+    if (idade) {
+      const n = parseInt(idade);
+      if (n < 14 || n > 24) mfSetMsg('mf-msg-nasc','Atenção: idade fora do perfil típico.','err');
+      else mfSetMsg('mf-msg-nasc','','');
+      mfMark('mf-nasc', n >= 14 && n <= 24);
+    }
+  });
+
+  document.getElementById('mf-unidade-tel').addEventListener('input', function() {
+    this.value = mfMaskTel(this.value);
+  });
+
+  document.getElementById('mf-cep').addEventListener('input', function() {
+    this.value = mfMaskCEP(this.value);
+    if (this.value.replace(/\D/g,'').length === 8) mfFetchCEP(this.value);
+  });
+
+  async function mfFetchCEP(cep) {
+    const raw = cep.replace(/\D/g,'');
+    const spin = document.getElementById('mf-cep-spin');
+    const autoFields = ['mf-rua','mf-bairro','mf-cidade','mf-estado'];
+    spin.classList.add('show');
+    mfSetMsg('mf-msg-cep','Buscando endereço…','');
+    autoFields.forEach(id => { const el = document.getElementById(id); el.value = ''; el.classList.remove('auto-filled'); });
+    try {
+      const res  = await fetch('https://viacep.com.br/ws/' + raw + '/json/');
+      const data = await res.json();
+      spin.classList.remove('show');
+      if (data.erro) {
+        mfSetMsg('mf-msg-cep','CEP não encontrado.','err');
+        mfMark('mf-cep', false); return;
+      }
+      document.getElementById('mf-rua').value    = data.logradouro || '';
+      document.getElementById('mf-bairro').value  = data.bairro    || '';
+      document.getElementById('mf-cidade').value  = data.localidade || '';
+      document.getElementById('mf-estado').value  = data.uf        || '';
+      autoFields.forEach(id => { if (document.getElementById(id).value) document.getElementById(id).classList.add('auto-filled'); });
+      mfMark('mf-cep', true);
+      mfSetMsg('mf-msg-cep','✓ Endereço encontrado','ok');
+      document.getElementById('mf-num').focus();
+    } catch(e) {
+      spin.classList.remove('show');
+      mfSetMsg('mf-msg-cep','Erro ao buscar. Verifique a conexão.','err');
+    }
+  }
+
+  // ── Step validation ───────────────────────────────────────────────
+  function mfValidateStep(step) {
+    let ok = true;
+    const fail = (inputId, msgId, msg) => {
+      mfMark(inputId, false);
+      mfSetMsg(msgId, msg, 'err');
+      ok = false;
+    };
+
+    if (step === 1) {
+      const nome = mfVal('mf-nome').trim();
+      if (nome.split(' ').filter(Boolean).length < 2) fail('mf-nome','mf-msg-nome','Informe nome e sobrenome.');
+      else { mfMark('mf-nome',true); mfSetMsg('mf-msg-nome','',''); }
+
+      const cpf = mfVal('mf-cpf');
+      if (!cpf.replace(/\D/g,'')) fail('mf-cpf','mf-msg-cpf','CPF obrigatório.');
+      else { mfMark('mf-cpf',true); mfSetMsg('mf-msg-cpf','',''); }
+
+      const tel = mfVal('mf-tel').replace(/\D/g,'');
+      if (tel.length < 10) fail('mf-tel','mf-msg-tel','Telefone inválido.');
+      else { mfMark('mf-tel',true); mfSetMsg('mf-msg-tel','',''); }
+
+      if (!mfVal('mf-nasc')) fail('mf-nasc','mf-msg-nasc','Data de nascimento obrigatória.');
+      else { mfMark('mf-nasc',true); }
+
+      if (!mfVal('mf-esc')) fail('mf-esc','mf-msg-esc','Selecione a escolaridade.');
+      else { mfMark('mf-esc',true); mfSetMsg('mf-msg-esc','',''); }
+
+      const cep = mfVal('mf-cep').replace(/\D/g,'');
+      if (cep.length < 8) fail('mf-cep','mf-msg-cep','CEP obrigatório (8 dígitos).');
+      else { mfMark('mf-cep',true); }
+    }
+
+    if (step === 2) {
+      if (!mfVal('mf-inst'))   fail('mf-inst','mf-msg-inst','Selecione a instituição.');
+      else { mfMark('mf-inst',true); mfSetMsg('mf-msg-inst','',''); }
+
+      if (!mfVal('mf-motivo')) fail('mf-motivo','mf-msg-motivo','Selecione o motivo.');
+      else { mfMark('mf-motivo',true); mfSetMsg('mf-msg-motivo','',''); }
+
+      if (!mfVal('mf-status')) fail('mf-status','mf-msg-status','Selecione o status.');
+      else { mfMark('mf-status',true); mfSetMsg('mf-msg-status','',''); }
+    }
+
+    if (step === 3) {
+      if (!mfVal('mf-unidade-tipo')) fail('mf-unidade-tipo','mf-msg-unidade-tipo','Selecione o tipo de unidade.');
+      else { mfMark('mf-unidade-tipo',true); mfSetMsg('mf-msg-unidade-tipo','',''); }
+
+      if (!mfVal('mf-unidade-nome').trim()) fail('mf-unidade-nome','mf-msg-unidade-nome','Informe o nome da unidade.');
+      else { mfMark('mf-unidade-nome',true); mfSetMsg('mf-msg-unidade-nome','',''); }
+    }
+
+    return ok;
+  }
+
+  // ── Stepper update ────────────────────────────────────────────────
+  function mfUpdateStepper(current) {
+    for (let i = 1; i <= MF_TOTAL; i++) {
+      const dot = document.getElementById('mf-step-dot-' + i);
+      if (!dot) continue;
+      dot.classList.remove('active','done');
+      if (i < current) dot.classList.add('done');
+      else if (i === current) dot.classList.add('active');
+    }
+    for (let i = 1; i < MF_TOTAL; i++) {
+      const fill = document.getElementById('mf-conn-fill-' + i);
+      if (fill) fill.style.width = i < current ? '100%' : '0';
+    }
+  }
+
+  // ── Navigate ──────────────────────────────────────────────────────
+  function mfGoTo(from, to, direction) {
+    const fromPanel = document.getElementById('mf-panel-' + from);
+    const toPanel   = document.getElementById('mf-panel-' + to);
+    if (!fromPanel || !toPanel) return;
+
+    fromPanel.style.animation = direction === 'forward'
+      ? 'mfOut 0.2s ease forwards'
+      : 'mfIn 0.2s ease reverse';
+
+    setTimeout(() => {
+      fromPanel.classList.remove('active');
+      fromPanel.style.animation = '';
+      toPanel.classList.add('active');
+      toPanel.style.animation = direction === 'forward'
+        ? 'mfIn 0.3s ease forwards'
+        : 'mfInBack 0.3s ease forwards';
+      mfCurrentStep = to;
+      mfUpdateStepper(to);
+      if (to === 4) mfBuildSummary();
+    }, 180);
+  }
+
+  function mfNext(step) {
+    if (!mfValidateStep(step)) {
+      // Shake the Next button
+      const btn = event.currentTarget;
+      btn.style.animation = 'none';
+      btn.offsetHeight;
+      btn.style.animation = 'shakeX 0.35s ease';
+      setTimeout(() => btn.style.animation = '', 400);
+      return;
+    }
+    mfGoTo(step, step + 1, 'forward');
+  }
+
+  function mfBack(step) {
+    mfGoTo(step, step - 1, 'back');
+  }
+
+  function mfGoToStep(target) {
+    if (target === mfCurrentStep) return;
+    // Only allow navigating to already-visited steps (≤ mfCurrentStep) freely
+    // Forward navigation still goes through validation via mfNext
+    if (target < mfCurrentStep) {
+      mfGoTo(mfCurrentStep, target, 'back');
+    } else if (target === mfCurrentStep + 1) {
+      // Simulate clicking next — validate current step first
+      if (!mfValidateStep(mfCurrentStep)) return;
+      mfGoTo(mfCurrentStep, target, 'forward');
+    }
+  }
+
+  // ── Summary ───────────────────────────────────────────────────────
+  function mfBuildSummary() {
+    const nome   = mfVal('mf-nome').trim();
+    const initials = nome.split(' ').filter(Boolean).map(w => w[0]).slice(0,2).join('').toUpperCase();
+    document.getElementById('sum-avatar').textContent = initials || '?';
+    document.getElementById('sum-nome').textContent   = nome || '—';
+    document.getElementById('sum-sub').textContent    = mfVal('mf-inst') + ' · ' + mfVal('mf-nasc');
+    document.getElementById('sum-idade').textContent  = mfVal('mf-idade') || '—';
+    document.getElementById('sum-cpf').textContent   = mfVal('mf-cpf')  || '—';
+    document.getElementById('sum-tel').textContent   = mfVal('mf-tel')  || '—';
+    document.getElementById('sum-inst').textContent  = mfVal('mf-inst') || '—';
+    const tec = mfVal('mf-tecnico').trim();
+    document.getElementById('sum-tecnico').textContent = tec || 'Não informado';
+    document.getElementById('sum-motivo').textContent  = mfVal('mf-motivo') || '—';
+    document.getElementById('sum-esc').textContent     = mfVal('mf-esc')    || '—';
+
+    const statusVal = mfVal('mf-status');
+    const statusColors = { 'Em Espera':'amber','Em Curso':'blue','Empregado':'green','Desligado':'gray' };
+    document.getElementById('sum-status').innerHTML = statusVal
+      ? `<span class="tag ${statusColors[statusVal] || 'gray'}">${statusVal}</span>`
+      : '—';
+
+    const cidade = mfVal('mf-cidade');
+    const rua    = mfVal('mf-rua');
+    const num    = mfVal('mf-num');
+    const uf     = mfVal('mf-estado');
+    let end = '';
+    if (rua) end += rua + (num ? ', ' + num : '');
+    if (cidade) end += (end ? ' · ' : '') + cidade + (uf ? ' / ' + uf : '');
+    document.getElementById('sum-end').textContent = end || '—';
+
+    const unidadeTipo = mfVal('mf-unidade-tipo');
+    const unidadeNome = mfVal('mf-unidade-nome').trim();
+    document.getElementById('sum-unidade').textContent =
+      unidadeTipo && unidadeNome ? unidadeTipo + ' · ' + unidadeNome : (unidadeNome || unidadeTipo || '—');
+
+    const unidadeResp = mfVal('mf-unidade-responsavel').trim();
+    document.getElementById('sum-unidade-resp').textContent = unidadeResp || 'Não informado';
+  }
+
+  // ── Finalize ──────────────────────────────────────────────────────
+  function mfFinalize() {
+    const btn = document.getElementById('btn-finalizar');
+    btn.classList.add('loading');
+    btn.innerHTML = '<div class="mini-spin" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></div> Salvando…';
+
+    setTimeout(() => {
+      // Add to APRENDIZES array so list updates
+      const nome = mfVal('mf-nome').trim();
+      const parts = nome.split(' ').filter(Boolean);
+      const initials = parts.map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      const colors = ['blue','green','amber','purple','red'];
+      const newEntry = {
+        id: APRENDIZES.length + 100,
+        nome, iniciais: initials,
+        cor: colors[Math.floor(Math.random() * colors.length)],
+        dob: mfVal('mf-nasc'),
+        idade: parseInt(mfVal('mf-idade')) || 0,
+        cpf: mfVal('mf-cpf'),
+        instituicao: mfVal('mf-inst'),
+        tecnico: mfVal('mf-tecnico') || 'Não informado',
+        motivo: mfVal('mf-motivo'),
+        status: mfVal('mf-status'),
+        empresa: '—',
+        ultimaAtualizacao: new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}),
+        responsavel: '—', vinculo: '—', telefone: mfVal('mf-tel'),
+        rua: mfVal('mf-rua') + (mfVal('mf-num') ? ', '+mfVal('mf-num') : ''),
+        bairro: mfVal('mf-bairro'), cidade: mfVal('mf-cidade')+' / '+mfVal('mf-estado'),
+        cep: mfVal('mf-cep'), escola: '—', serie: '—', freqEscolar: '—',
+        evolucoes: mfVal('mf-obs') ? [{ data: new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), texto: mfVal('mf-obs') }] : []
+      };
+      APRENDIZES.push(newEntry);
+      notasMap[newEntry.id] = [...newEntry.evolucoes];
+      filteredAprendizes = [...APRENDIZES];
+
+      // Update subtitle
+      views.aprendizes.subtitle = `${APRENDIZES.length} inscritos · Turma 2025/01`;
+
+      // Show success
+      document.getElementById('mf-summary-content').style.display = 'none';
+      document.getElementById('mf-success').classList.add('show');
+    }, 900);
+  }
+
+  // ── Reset ─────────────────────────────────────────────────────────
+  function mfReset() {
+    // Clear all inputs
+    document.querySelectorAll('#view-cadastro .mf-input').forEach(el => {
+      if (el.tagName === 'SELECT') el.selectedIndex = 0;
+      else el.value = '';
+      el.classList.remove('valid','invalid','auto-filled');
+    });
+    document.querySelectorAll('#view-cadastro .mf-msg').forEach(el => {
+      el.textContent = ''; el.className = 'mf-msg';
+    });
+    // Reset auto-filled styling
+    ['mf-rua','mf-bairro','mf-cidade','mf-estado'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.classList.remove('auto-filled'); }
+    });
+    // Show summary content again, hide success
+    const sc = document.getElementById('mf-summary-content');
+    const su = document.getElementById('mf-success');
+    if (sc) sc.style.display = '';
+    if (su) su.classList.remove('show');
+
+    const btn = document.getElementById('btn-finalizar');
+    if (btn) {
+      btn.classList.remove('loading');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Finalizar Cadastro';
+    }
+
+    // Go back to step 1
+    document.querySelectorAll('.mf-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('mf-panel-1').classList.add('active');
+    mfCurrentStep = 1;
+    mfUpdateStepper(1);
+  }
+
+</script>
+
+</body>
+</html>

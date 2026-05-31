@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa Territorial — Radar Descubra!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #f0f0f3;
+      --border: rgba(0,0,0,0.08);
+      --text: #111112;
+      --text2: #6b6b7a;
+      --text3: #9999a8;
+      --accent: #1a1a2e;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-text: #1d4ed8;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --green-text: #15803d;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --amber-text: #b45309;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --red-text: #b91c1c;
+      --purple: #7c3aed;
+      --purple-bg: #f5f3ff;
+      --purple-text: #6d28d9;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+      --sidebar-w: 240px;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--accent);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      padding: 0 0 1.5rem;
+    }
+
+    .sidebar-logo {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo span {
+      font-size: 13px; font-weight: 600; color: #fff;
+      letter-spacing: -0.01em; display: block;
+    }
+    .sidebar-logo small {
+      font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 400;
+    }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+
+    .nav-section-label {
+      font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 1rem 0.5rem 0.4rem;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.5rem 0.75rem; border-radius: var(--radius-xs);
+      color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-item svg { flex-shrink: 0; opacity: 0.7; }
+    .nav-item.active svg { opacity: 1; }
+
+    .sidebar-footer {
+      padding: 0 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1rem;
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.5rem 0.75rem; border-radius: var(--radius-xs);
+    }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .sidebar-user-info span { display: block; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8); }
+    .sidebar-user-info small { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ── Main ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-left { display: flex; flex-direction: column; }
+    .topbar-left h1 { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .topbar-left span { font-size: 12px; color: var(--text2); }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    .topbar-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 0.875rem; height: 32px; border-radius: var(--radius-xs);
+      font-size: 12px; font-weight: 500; cursor: pointer; border: none;
+      font-family: var(--font); transition: background 0.15s;
+    }
+    .topbar-btn.ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .topbar-btn.ghost:hover { background: var(--surface2); }
+    .topbar-btn.primary { background: var(--accent); color: #fff; }
+
+    .period-select {
+      font-family: var(--font); font-size: 12px; color: var(--text2);
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      padding: 0 0.75rem; height: 32px; background: var(--surface);
+      cursor: pointer; outline: none;
+    }
+
+    /* ── Content ── */
+    .content { padding: 1.75rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── Alert banner ── */
+    .alert-banner {
+      background: #fef3c7; border: 1px solid #fde68a;
+      border-radius: var(--radius-sm); padding: 0.75rem 1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      font-size: 13px; color: #92400e;
+    }
+    .alert-banner svg { flex-shrink: 0; }
+    .alert-banner strong { font-weight: 600; }
+
+    /* ── KPI Grid ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .kpi-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.125rem 1.25rem;
+      box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .kpi-header { display: flex; align-items: center; justify-content: space-between; }
+    .kpi-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+    .kpi-icon { width: 28px; height: 28px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; }
+    .kpi-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .kpi-icon.green { background: var(--green-bg); color: var(--green); }
+    .kpi-icon.amber { background: var(--amber-bg); color: var(--amber); }
+    .kpi-icon.red { background: var(--red-bg); color: var(--red); }
+    .kpi-icon.purple { background: var(--purple-bg); color: var(--purple); }
+    .kpi-value { font-size: 28px; font-weight: 600; color: var(--text); letter-spacing: -0.03em; font-family: var(--mono); line-height: 1.1; }
+    .kpi-delta {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 500; padding: 2px 6px; border-radius: 99px;
+    }
+    .kpi-delta.up { background: var(--green-bg); color: var(--green-text); }
+    .kpi-delta.down { background: var(--red-bg); color: var(--red-text); }
+
+    /* ── Layout ── */
+    .row-2col { display: grid; grid-template-columns: 1fr 340px; gap: 1rem; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow);
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .card-subtitle { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+    /* ── Filter pills ── */
+    .filter-pill {
+      padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text2);
+      cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .filter-pill:hover { background: var(--surface2); }
+    .filter-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ── Risk items ── */
+    .risk-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.625rem 0.75rem; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--surface2);
+      cursor: pointer; transition: border-color 0.15s; margin-bottom: 0.5rem;
+    }
+    .risk-item:last-child { margin-bottom: 0; }
+    .risk-item:hover { border-color: rgba(0,0,0,0.18); }
+
+    /* ── Progress bar ── */
+    .progress-bar { height: 5px; border-radius: 99px; background: var(--surface2); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; }
+    .progress-fill.green { background: var(--green); }
+    .progress-fill.amber { background: var(--amber); }
+    .progress-fill.red { background: var(--red); }
+    .progress-fill.blue { background: var(--blue); }
+
+    /* ── Tags ── */
+    .tag {
+      display: inline-flex; align-items: center;
+      font-size: 10px; font-weight: 500;
+      padding: 2px 7px; border-radius: 99px; white-space: nowrap;
+    }
+    .tag.green { background: var(--green-bg); color: var(--green-text); }
+    .tag.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .tag.red { background: var(--red-bg); color: var(--red-text); }
+    .tag.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .tag.gray { background: var(--surface2); color: var(--text2); }
+
+    /* ── Stat row ── */
+    .stat-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 12px;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row-label { color: var(--text2); }
+    .stat-row-val { font-weight: 600; font-family: var(--mono); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th {
+      text-align: left; padding: 0.5rem 0.75rem;
+      font-size: 11px; font-weight: 500; color: var(--text2);
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    tbody td {
+      padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border);
+      color: var(--text); vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--surface2); }
+
+    .btn-direcionar {
+      background: var(--green); color: #fff; border: none;
+      border-radius: var(--radius-xs); font-size: 11px; font-weight: 500;
+      font-family: var(--font); padding: 4px 10px; cursor: pointer;
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .btn-direcionar:hover { background: var(--green-text); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #fff; padding: 0.625rem 1.25rem;
+      border-radius: 99px; font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 9999;
+      display: none; align-items: center; gap: 8px;
+    }
+
+    @media (max-width: 1100px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .row-2col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+    <span>Radar Descubra!</span>
+    <small>Sistema de Acompanhamento</small>
+  </div>
+    <nav class="sidebar-nav">
+    <div class="nav-section-label">Visão Geral</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="aprendizes.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Aprendizes
+      <span class="nav-badge">14</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Pais / Responsáveis
+      <span class="nav-badge amber">3</span>
+    </a>
+    <div class="nav-section-label">Monitoramento</div>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Riscos
+    </a>
+    <a href="mapa_territorial.html" class="nav-item active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+      Mapa Territorial
+    </a>
+    <div class="nav-section-label">Operacional</div>
+    <a href="vagas_alocacao.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Vagas e Alocação
+    </a>
+    <a href="comunicacoes.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Comunicações
+      <span class="nav-badge">5</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda
+    </a>
+    <a href="relatorios.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Relatórios
+    </a>
+    <div class="nav-section-label">Configurações</div>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Configurações
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar">CL</div>
+      <div class="sidebar-user-info">
+        <span>Carlos Lima</span>
+        <small>Técnico CRAS</small>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- ── Topbar ── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>🗺️ Mapa Territorial</h1>
+      <span>Análise geográfica de evasão · Pirapora, Buritizeiro e Jequitaí</span>
+    </div>
+    <div class="topbar-right">
+      <select class="period-select" id="filter-cidade-v" onchange="filtrarCidadeView(this.value)">
+        <option value="todos">Todas as cidades</option>
+        <option value="pirapora">Pirapora</option>
+        <option value="buritizeiro">Buritizeiro</option>
+        <option value="pbj">Pirapora do B.J.</option>
+      </select>
+      <button class="topbar-btn ghost" onclick="showToast('Relatório territorial exportado.')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar para MP
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Content ── -->
+  <div class="content">
+
+    <!-- Alerta -->
+    <div class="alert-banner" style="background:#fef2f2; border-color:#fecaca; color:#b91c1c;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>🚨 <strong>Alerta territorial:</strong> Bairro Aparecida (Pirapora) e E.E. Santos Dumont concentram <strong>58% dos casos críticos</strong>. Intervenção coordenada recomendada.</div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Territórios Mapeados</span>
+          <div class="kpi-icon blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg></div>
+        </div>
+        <div class="kpi-value">17</div>
+        <div style="margin-top:4px;"><span class="kpi-delta up">3 cidades</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Zonas de Risco Crítico</span>
+          <div class="kpi-icon red"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+        </div>
+        <div class="kpi-value">3</div>
+        <div style="margin-top:4px;"><span class="kpi-delta down">Ação imediata</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Taxa Média de Evasão</span>
+          <div class="kpi-icon amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        </div>
+        <div class="kpi-value">21<span style="font-size:14px;font-weight:400;color:var(--text3)">%</span></div>
+        <div style="margin-top:4px;"><span class="kpi-delta down">↑ +3pp este mês</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Causa Mais Frequente</span>
+          <div class="kpi-icon purple"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div>
+        </div>
+        <div class="kpi-value" style="font-size:18px; line-height:1.4;">Transporte</div>
+        <div style="margin-top:4px;"><span class="kpi-delta down">28% dos casos</span></div>
+      </div>
+    </div>
+
+    <div class="row-2col">
+      <!-- Lista de calor territorial -->
+      <div class="card">
+        <div class="card-header" style="margin-bottom:0.875rem;">
+          <div>
+            <div class="card-title">Mapa de Calor por Bairro e Escola</div>
+            <div class="card-subtitle">Clique em ação para intervenção direta</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:4px; margin-bottom:1rem; flex-wrap:wrap;">
+          <button class="filter-pill active" onclick="filtMapBtn(this,'todos')">Todos</button>
+          <button class="filter-pill" onclick="filtMapBtn(this,'pirapora')">Pirapora</button>
+          <button class="filter-pill" onclick="filtMapBtn(this,'buritizeiro')">Buritizeiro</button>
+          <button class="filter-pill" onclick="filtMapBtn(this,'pbj')">Pirapora do B.J.</button>
+          <button class="filter-pill" onclick="filtMapBtn(this,'escola')">Escolas</button>
+        </div>
+        <div id="map-heat-list">
+
+          <div class="risk-item" data-mapa="pirapora" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:0.875rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--red-bg);color:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1;">33</span>
+                <span style="font-size:9px;opacity:0.7;">%</span>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:12.5px;font-weight:600;">Bairro Aparecida <span class="tag red" style="margin-left:4px;">Crítico</span></div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Pirapora · 24 jovens · 8 em risco</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                  <div class="progress-bar" style="flex:1;"><div class="progress-fill red" style="width:33%"></div></div>
+                  <span style="font-size:10.5px;font-family:var(--mono);color:var(--red);">33%</span>
+                </div>
+              </div>
+              <button class="btn-direcionar" style="background:var(--blue);" onclick="showToast('Ofício de transporte gerado para Prefeitura de Pirapora.')">Oficiar Prefeitura</button>
+            </div>
+          </div>
+
+          <div class="risk-item" data-mapa="escola" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:0.875rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--amber-bg);color:var(--amber);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1;">39</span>
+                <span style="font-size:9px;opacity:0.7;">%</span>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:12.5px;font-weight:600;">E.E. Santos Dumont <span class="tag amber" style="margin-left:4px;">Alto</span></div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Pirapora · 31 alunos · 12 com defasagem pedagógica</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                  <div class="progress-bar" style="flex:1;"><div class="progress-fill amber" style="width:39%"></div></div>
+                  <span style="font-size:10.5px;font-family:var(--mono);color:var(--amber);">39%</span>
+                </div>
+              </div>
+              <button class="btn-direcionar" onclick="showToast('Turma de nivelamento solicitada ao SENAC.')">Solicitar SENAC</button>
+            </div>
+          </div>
+
+          <div class="risk-item" data-mapa="buritizeiro" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:0.875rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--red-bg);color:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1;">33</span>
+                <span style="font-size:9px;opacity:0.7;">%</span>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:12.5px;font-weight:600;">Bairro Industrial <span class="tag red" style="margin-left:4px;">Crítico</span></div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Buritizeiro · 18 jovens · 6 em risco de trabalho infantil</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                  <div class="progress-bar" style="flex:1;"><div class="progress-fill red" style="width:33%"></div></div>
+                  <span style="font-size:10.5px;font-family:var(--mono);color:var(--red);">33%</span>
+                </div>
+              </div>
+              <button class="btn-direcionar" style="background:var(--red);" onclick="showToast('Conselho Tutelar acionado para Bairro Industrial.')">Acionar CT</button>
+            </div>
+          </div>
+
+          <div class="risk-item" data-mapa="escola" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:0.875rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--amber-bg);color:var(--amber);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1;">27</span>
+                <span style="font-size:9px;opacity:0.7;">%</span>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:12.5px;font-weight:600;">E.E. Tiradentes <span class="tag amber" style="margin-left:4px;">Atenção</span></div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Pirapora · 22 alunos · 6 com faltas recorrentes</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                  <div class="progress-bar" style="flex:1;"><div class="progress-fill amber" style="width:27%"></div></div>
+                  <span style="font-size:10.5px;font-family:var(--mono);color:var(--amber);">27%</span>
+                </div>
+              </div>
+              <button class="topbar-btn ghost" style="height:27px;font-size:11px;padding:0 0.625rem;" onclick="showToast('Alerta enviado para E.E. Tiradentes.')">Notificar Escola</button>
+            </div>
+          </div>
+
+          <div class="risk-item" data-mapa="buritizeiro" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:0.875rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--blue-bg);color:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1;">14</span>
+                <span style="font-size:9px;opacity:0.7;">%</span>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:12.5px;font-weight:600;">Centro — Buritizeiro <span class="tag blue" style="margin-left:4px;">Médio</span></div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Buritizeiro · 22 jovens · 3 em acompanhamento</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                  <div class="progress-bar" style="flex:1;"><div class="progress-fill blue" style="width:14%"></div></div>
+                  <span style="font-size:10.5px;font-family:var(--mono);color:var(--blue);">14%</span>
+                </div>
+              </div>
+              <button class="topbar-btn ghost" style="height:27px;font-size:11px;padding:0 0.625rem;" onclick="showToast('Monitoramento ativado.')">Monitorar</button>
+            </div>
+          </div>
+
+          <div class="risk-item" data-mapa="pbj" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:0.875rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--amber-bg);color:var(--amber);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1;">25</span>
+                <span style="font-size:9px;opacity:0.7;">%</span>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:12.5px;font-weight:600;">Pirapora do B.J. — Geral <span class="tag amber" style="margin-left:4px;">Atenção</span></div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Pirapora do B.J. · 28 jovens · 7 em risco</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                  <div class="progress-bar" style="flex:1;"><div class="progress-fill amber" style="width:25%"></div></div>
+                  <span style="font-size:10.5px;font-family:var(--mono);color:var(--amber);">25%</span>
+                </div>
+              </div>
+              <button class="topbar-btn ghost" style="height:27px;font-size:11px;padding:0 0.625rem;" onclick="showToast('Visitas agendadas para Pirapora do B.J.')">Agendar Visitas</button>
+            </div>
+          </div>
+
+          <div class="risk-item" data-mapa="pirapora" style="flex-direction:column; align-items:flex-start; gap:0.5rem; padding:0.875rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; width:100%;">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--green-bg);color:var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:18px;font-weight:700;font-family:var(--mono);line-height:1;">7</span>
+                <span style="font-size:9px;opacity:0.7;">%</span>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:12.5px;font-weight:600;">Centro — Pirapora <span class="tag green" style="margin-left:4px;">Estável</span></div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Pirapora · 28 jovens · 2 em acompanhamento leve</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                  <div class="progress-bar" style="flex:1;"><div class="progress-fill green" style="width:7%"></div></div>
+                  <span style="font-size:10.5px;font-family:var(--mono);color:var(--green);">7%</span>
+                </div>
+              </div>
+              <span class="tag green">Estável</span>
+            </div>
+          </div>
+
+        </div><!-- /map-heat-list -->
+      </div>
+
+      <!-- Painel direito: charts + causas + ação -->
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Distribuição por Cidade</div></div>
+          <div style="position:relative; height:200px;"><canvas id="chartMapaCidade"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Causas de Evasão</div><div class="card-subtitle">Por território</div></div>
+          <div style="position:relative; height:180px;"><canvas id="chartMapaCausas"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Principais Causas</div></div>
+          <div>
+            <div class="stat-row"><span class="stat-row-label">Falta de transporte</span><span class="stat-row-val" style="color:var(--red)">28%</span></div>
+            <div class="stat-row"><span class="stat-row-label">Trabalho infantil ativo</span><span class="stat-row-val" style="color:var(--red)">22%</span></div>
+            <div class="stat-row"><span class="stat-row-label">Defasagem pedagógica</span><span class="stat-row-val" style="color:var(--amber)">20%</span></div>
+            <div class="stat-row"><span class="stat-row-label">Resistência familiar</span><span class="stat-row-val" style="color:var(--amber)">18%</span></div>
+            <div class="stat-row"><span class="stat-row-label">Outros</span><span class="stat-row-val" style="color:var(--text2)">12%</span></div>
+          </div>
+        </div>
+        <div class="card" style="background:linear-gradient(135deg,var(--accent),#2a2a5a);color:#fff;border:none;">
+          <div style="font-size:11px;opacity:0.5;margin-bottom:6px;">AÇÃO RECOMENDADA</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Intervenção Coordenada — 2 Territórios Críticos</div>
+          <div style="font-size:11.5px;opacity:0.7;margin-bottom:12px;">Bairro Aparecida e Bairro Industrial precisam de ação conjunta entre CREAS, Conselho Tutelar e Prefeitura.</div>
+          <button class="topbar-btn" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.2);width:100%;justify-content:center;" onclick="showToast('Reunião intersetorial agendada.')">Agendar Reunião Intersetorial</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela detalhada territorial -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Detalhamento por Território</div>
+          <div class="card-subtitle">Todos os bairros e escolas monitorados</div>
+        </div>
+        <button class="topbar-btn ghost" onclick="showToast('Tabela exportada.')">Exportar planilha</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Território</th><th>Cidade</th><th>Tipo</th>
+              <th>Jovens</th><th>Em Risco</th><th>Taxa</th>
+              <th>Causa Principal</th><th>Nível</th><th>Ação Prescritiva</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bairro Aparecida</strong></td><td>Pirapora</td><td><span class="tag gray">Bairro</span></td>
+              <td style="font-family:var(--mono)">24</td><td style="font-family:var(--mono);color:var(--red)">8</td>
+              <td><span class="tag red">33%</span></td><td><span class="tag red">Transporte</span></td>
+              <td><span class="tag red">Crítico</span></td>
+              <td><button class="btn-direcionar" style="background:var(--blue);" onclick="showToast('Ofício enviado.')">Oficiar Prefeitura</button></td>
+            </tr>
+            <tr>
+              <td><strong>E.E. Santos Dumont</strong></td><td>Pirapora</td><td><span class="tag blue">Escola</span></td>
+              <td style="font-family:var(--mono)">31</td><td style="font-family:var(--mono);color:var(--amber)">12</td>
+              <td><span class="tag amber">39%</span></td><td><span class="tag amber">Nível Escolar</span></td>
+              <td><span class="tag amber">Alto</span></td>
+              <td><button class="btn-direcionar" onclick="showToast('Nivelamento solicitado.')">Nivelamento SENAC</button></td>
+            </tr>
+            <tr>
+              <td><strong>Bairro Industrial</strong></td><td>Buritizeiro</td><td><span class="tag gray">Bairro</span></td>
+              <td style="font-family:var(--mono)">18</td><td style="font-family:var(--mono);color:var(--red)">6</td>
+              <td><span class="tag red">33%</span></td><td><span class="tag red">Trab. Infantil</span></td>
+              <td><span class="tag red">Crítico</span></td>
+              <td><button class="btn-direcionar" style="background:var(--red);" onclick="showToast('CT acionado.')">Acionar CT</button></td>
+            </tr>
+            <tr>
+              <td><strong>E.E. Tiradentes</strong></td><td>Pirapora</td><td><span class="tag blue">Escola</span></td>
+              <td style="font-family:var(--mono)">22</td><td style="font-family:var(--mono);color:var(--amber)">6</td>
+              <td><span class="tag amber">27%</span></td><td><span class="tag amber">Faltas</span></td>
+              <td><span class="tag amber">Atenção</span></td>
+              <td><button class="topbar-btn ghost" style="height:27px;font-size:11px;padding:0 0.625rem;" onclick="showToast('Escola notificada.')">Notificar Escola</button></td>
+            </tr>
+            <tr>
+              <td><strong>Centro — Buritizeiro</strong></td><td>Buritizeiro</td><td><span class="tag gray">Bairro</span></td>
+              <td style="font-family:var(--mono)">22</td><td style="font-family:var(--mono);color:var(--blue)">3</td>
+              <td><span class="tag blue">14%</span></td><td><span class="tag blue">Família</span></td>
+              <td><span class="tag blue">Médio</span></td>
+              <td><button class="topbar-btn ghost" style="height:27px;font-size:11px;padding:0 0.625rem;">Monitorar</button></td>
+            </tr>
+            <tr>
+              <td><strong>Pirapora do B.J. — Geral</strong></td><td>Pirapora do B.J.</td><td><span class="tag gray">Cidade</span></td>
+              <td style="font-family:var(--mono)">28</td><td style="font-family:var(--mono);color:var(--amber)">7</td>
+              <td><span class="tag amber">25%</span></td><td><span class="tag amber">Distância</span></td>
+              <td><span class="tag amber">Atenção</span></td>
+              <td><button class="topbar-btn ghost" style="height:27px;font-size:11px;padding:0 0.625rem;" onclick="showToast('Visitas agendadas.')">Agendar Visitas</button></td>
+            </tr>
+            <tr>
+              <td><strong>Centro — Pirapora</strong></td><td>Pirapora</td><td><span class="tag gray">Bairro</span></td>
+              <td style="font-family:var(--mono)">28</td><td style="font-family:var(--mono);color:var(--green)">2</td>
+              <td><span class="tag green">7%</span></td><td><span class="tag green">Baixo risco</span></td>
+              <td><span class="tag green">Estável</span></td>
+              <td><span class="tag gray">Estável</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+  // ── Toast ──────────────────────────────────────────────────────────────
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    var m = document.getElementById('toast-msg');
+    m.textContent = msg;
+    t.style.display = 'flex';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.style.display = 'none'; }, 3000);
+  }
+
+  // ── Filter heat map by city / escola ──────────────────────────────────
+  function filtMapBtn(btn, filter) {
+    document.querySelectorAll('.filter-pill').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('#map-heat-list .risk-item').forEach(function(item) {
+      if (filter === 'todos') {
+        item.style.display = '';
+      } else {
+        item.style.display = (item.dataset.mapa === filter) ? '' : 'none';
+      }
+    });
+  }
+
+  // ── Filter by city dropdown (topbar) ──────────────────────────────────
+  function filtrarCidadeView(val) {
+    var map = { pirapora: 'pirapora', buritizeiro: 'buritizeiro', pbj: 'pbj', todos: 'todos' };
+    var filter = map[val] || 'todos';
+    var activeBtn = document.querySelector('.filter-pill.active');
+    document.querySelectorAll('#map-heat-list .risk-item').forEach(function(item) {
+      if (filter === 'todos') {
+        item.style.display = '';
+      } else {
+        item.style.display = (item.dataset.mapa === filter) ? '' : 'none';
+      }
+    });
+  }
+
+  // ── Charts ────────────────────────────────────────────────────────────
+  // Distribuição por Cidade
+  var cidadeCtx = document.getElementById('chartMapaCidade').getContext('2d');
+  new Chart(cidadeCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Pirapora', 'Buritizeiro', 'Pirapora do B.J.'],
+      datasets: [{
+        label: 'Jovens',
+        data: [105, 62, 28],
+        backgroundColor: ['#eff6ff', '#fef2f2', '#fffbeb'],
+        borderColor: ['#2563eb', '#dc2626', '#d97706'],
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          ticks: { font: { size: 11 }, color: '#9999a8' },
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        },
+        x: {
+          ticks: { font: { size: 11 }, color: '#9999a8' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // Causas de Evasão
+  var causasCtx = document.getElementById('chartMapaCausas').getContext('2d');
+  new Chart(causasCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Transporte', 'Trab. Infantil', 'Defasagem', 'Família', 'Outros'],
+      datasets: [{
+        data: [28, 22, 20, 18, 12],
+        backgroundColor: ['#dc2626', '#ef4444', '#d97706', '#2563eb', '#9999a8'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 10 }, padding: 10, color: '#6b6b7a', boxWidth: 10 }
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

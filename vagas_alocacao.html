@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão de Vagas — Radar Descubra!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #f0f0f3;
+      --border: rgba(0,0,0,0.08);
+      --text: #111112;
+      --text2: #6b6b7a;
+      --text3: #9999a8;
+      --accent: #1a1a2e;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-text: #1d4ed8;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --green-text: #15803d;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --amber-text: #b45309;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --red-text: #b91c1c;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+      --sidebar-w: 240px;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--accent);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      padding: 0 0 1.5rem;
+    }
+
+    .sidebar-logo {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo span {
+      font-size: 13px; font-weight: 600; color: #fff;
+      letter-spacing: -0.01em; display: block;
+    }
+    .sidebar-logo small { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 400; }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+
+    .nav-section-label {
+      font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 1rem 0.5rem 0.4rem;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.5rem 0.75rem; border-radius: var(--radius-xs);
+      color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, color 0.15s; text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-item svg { flex-shrink: 0; opacity: 0.7; }
+    .nav-item.active svg { opacity: 1; }
+
+    .nav-badge {
+      margin-left: auto; background: var(--red); color: #fff;
+      font-size: 10px; font-weight: 600; padding: 1px 6px;
+      border-radius: 99px; font-family: var(--mono);
+    }
+
+    .sidebar-footer {
+      padding: 0 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1rem;
+    }
+    .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 0.5rem 0.75rem; border-radius: var(--radius-xs); }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .sidebar-user-info span { display: block; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8); }
+    .sidebar-user-info small { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ── Main ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-left { display: flex; flex-direction: column; }
+    .topbar-left h1 { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .topbar-left span { font-size: 12px; color: var(--text2); }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    .topbar-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 0.875rem; height: 32px; border-radius: var(--radius-xs);
+      font-size: 12px; font-weight: 500; cursor: pointer; border: none;
+      font-family: var(--font); transition: background 0.15s;
+    }
+    .topbar-btn.ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .topbar-btn.ghost:hover { background: var(--surface2); }
+    .topbar-btn.primary { background: var(--accent); color: #fff; }
+    .topbar-btn.primary:hover { background: #2a2a4a; }
+
+    .period-select {
+      font-family: var(--font); font-size: 12px; color: var(--text2);
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      padding: 0 0.75rem; height: 32px; background: var(--surface);
+      cursor: pointer; outline: none;
+    }
+
+    /* ── Content ── */
+    .content { padding: 1.75rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── KPI Cards ── */
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: box-shadow 0.15s;
+    }
+    .kpi-card:hover { box-shadow: var(--shadow-md); }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      letter-spacing: 0.01em;
+    }
+
+    .kpi-value {
+      font-family: var(--mono);
+      font-size: 2rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi-meta {
+      font-size: 11px;
+      color: var(--text3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .kpi-meta .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); display: inline-block;
+    }
+    .kpi-meta .dot.amber { background: var(--amber); }
+
+    /* ── Alert Banner ── */
+    .alert-banner {
+      background: var(--green-bg);
+      border: 1px solid rgba(22,163,74,0.2);
+      border-radius: var(--radius-sm);
+      padding: 0.875rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .alert-banner-icon {
+      width: 20px; height: 20px; flex-shrink: 0;
+      color: var(--green); margin-top: 1px;
+    }
+    .alert-banner-body {}
+    .alert-banner-title {
+      font-size: 13px; font-weight: 600; color: var(--green-text); margin-bottom: 2px;
+    }
+    .alert-banner-text { font-size: 12px; color: var(--green-text); opacity: 0.85; }
+
+    /* ── Ranking Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.25rem 1.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+    /* ── Filter Pills ── */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .filter-pill {
+      display: inline-flex; align-items: center;
+      padding: 0.3rem 0.875rem; border-radius: 99px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent; color: var(--text2);
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .filter-pill:hover { background: var(--surface2); color: var(--text); }
+    .filter-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .filter-count {
+      margin-left: 5px;
+      background: rgba(255,255,255,0.2);
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 99px;
+    }
+    .filter-pill:not(.active) .filter-count {
+      background: var(--surface2);
+      color: var(--text3);
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      font-size: 11px; font-weight: 500; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.75rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+
+    tbody td {
+      padding: 0.875rem 1.5rem;
+      font-size: 13px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .position-badge {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--surface2);
+      color: var(--text2);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; font-family: var(--mono);
+    }
+    .position-badge.top1 { background: #fef9c3; color: #854d0e; }
+    .position-badge.top2 { background: #f1f5f9; color: #475569; }
+    .position-badge.top3 { background: #fff7ed; color: #9a3412; }
+
+    .young-name { font-weight: 500; color: var(--text); }
+    .young-age { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+
+    /* Tags / Badges */
+    .tag {
+      display: inline-flex; align-items: center;
+      padding: 0.2rem 0.6rem; border-radius: var(--radius-xs);
+      font-size: 11px; font-weight: 500; white-space: nowrap;
+    }
+    .tag.red { background: var(--red-bg); color: var(--red-text); }
+    .tag.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .tag.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .tag.green { background: var(--green-bg); color: var(--green-text); }
+
+    .score-cell {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .score-value {
+      font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text);
+    }
+    .score-info-icon {
+      color: var(--text3); cursor: help; flex-shrink: 0;
+      transition: color 0.15s;
+    }
+    .score-info-icon:hover { color: var(--blue); }
+
+    /* Score bar mini */
+    .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .score-bar {
+      width: 48px; height: 4px; border-radius: 99px;
+      background: var(--surface2); overflow: hidden;
+    }
+    .score-bar-fill { height: 100%; border-radius: 99px; background: var(--green); }
+    .score-bar-fill.medium { background: var(--amber); }
+    .score-bar-fill.low { background: var(--red); }
+
+    /* Modificador ghost button */
+    .mod-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font); font-size: 12px;
+      color: var(--blue-text); font-weight: 500;
+      padding: 0.25rem 0.5rem; border-radius: var(--radius-xs);
+      transition: background 0.15s;
+    }
+    .mod-btn:hover { background: var(--blue-bg); }
+
+    /* Ação: Direcionar */
+    .btn-direcionar {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--green); color: #fff;
+      border: none; cursor: pointer; font-family: var(--font);
+      font-size: 12px; font-weight: 500;
+      padding: 0.375rem 0.875rem; border-radius: var(--radius-xs);
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-direcionar:hover { background: #15803d; }
+    .btn-direcionar:active { transform: scale(0.97); }
+
+    /* ── Modal overlay ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.35); backdrop-filter: blur(2px);
+      z-index: 200; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface); border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      width: 420px; max-width: 94vw;
+      padding: 1.75rem;
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .modal-sub { font-size: 12px; color: var(--text2); margin-bottom: 1.25rem; }
+
+    .modal-field { margin-bottom: 1rem; }
+    .modal-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+    .modal-field input,
+    .modal-field select,
+    .modal-field textarea {
+      width: 100%; font-family: var(--font); font-size: 13px;
+      border: 1px solid var(--border); border-radius: var(--radius-xs);
+      padding: 0.5rem 0.75rem; background: var(--surface);
+      color: var(--text); outline: none; transition: border-color 0.15s;
+    }
+    .modal-field input:focus,
+    .modal-field select:focus,
+    .modal-field textarea:focus { border-color: var(--blue); }
+    .modal-field textarea { resize: vertical; min-height: 80px; }
+
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+    .modal-btn-cancel {
+      background: none; border: 1px solid var(--border); border-radius: var(--radius-xs);
+      padding: 0.5rem 1rem; font-family: var(--font); font-size: 13px;
+      color: var(--text2); cursor: pointer;
+    }
+    .modal-btn-cancel:hover { background: var(--surface2); }
+    .modal-btn-confirm {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: var(--radius-xs); padding: 0.5rem 1.25rem;
+      font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer;
+    }
+    .modal-btn-confirm:hover { background: #2a2a4a; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 300;
+      background: var(--accent); color: #fff;
+      padding: 0.75rem 1.25rem; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500;
+      box-shadow: var(--shadow-md);
+      display: flex; align-items: center; gap: 8px;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── Tooltip ── */
+    .tooltip-wrap { position: relative; display: inline-flex; }
+    .tooltip-box {
+      position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a2e; color: #fff;
+      font-size: 11px; white-space: nowrap;
+      padding: 5px 8px; border-radius: 5px;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s;
+    }
+    .tooltip-wrap:hover .tooltip-box { opacity: 1; }
+
+    /* ── Empty state row ── */
+    .empty-state {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--text3); font-size: 13px; display: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+    <span>Radar Descubra!</span>
+    <small>Sistema de Acompanhamento</small>
+  </div>
+
+    <nav class="sidebar-nav">
+    <div class="nav-section-label">Visão Geral</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="aprendizes.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Aprendizes
+      <span class="nav-badge">14</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Pais / Responsáveis
+      <span class="nav-badge amber">3</span>
+    </a>
+    <div class="nav-section-label">Monitoramento</div>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Riscos
+    </a>
+    <a href="mapa_territorial.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+      Mapa Territorial
+    </a>
+    <div class="nav-section-label">Operacional</div>
+    <a href="vagas_alocacao.html" class="nav-item active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Vagas e Alocação
+    </a>
+    <a href="comunicacoes.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Comunicações
+      <span class="nav-badge">5</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda
+    </a>
+    <a href="relatorios.html" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Relatórios
+    </a>
+    <div class="nav-section-label">Configurações</div>
+    <a href="#" class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Configurações
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar">AS</div>
+      <div class="sidebar-user-info">
+        <span>Ana Silva</span>
+        <small>Assistente Social</small>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Painel de Alocação e Prioridade</h1>
+      <span>Programa Descubra · Pirapora – MG</span>
+    </div>
+    <div class="topbar-right">
+      <select class="period-select" id="filterStatus">
+        <option value="">Todas as vagas</option>
+        <option value="ativas">Somente ativas</option>
+        <option value="encerradas">Encerradas</option>
+      </select>
+    
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Jovens Cadastrados</div>
+        <div class="kpi-value">248</div>
+        <div class="kpi-meta"><span class="dot"></span> Ativos no programa</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Jovens Alocados</div>
+        <div class="kpi-value">132</div>
+        <div class="kpi-meta"><span class="dot"></span> 53,2% do total</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Vagas Disponíveis</div>
+        <div class="kpi-value">41</div>
+        <div class="kpi-meta"><span class="dot amber"></span> 12 novas esta semana</div>
+      </div>
+    </div>
+
+    <!-- Alert Banner -->
+    <div class="alert-banner" id="alertBanner">
+      <svg class="alert-banner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <div class="alert-banner-body">
+        <div class="alert-banner-title">Nova vaga publicada!</div>
+        <div class="alert-banner-text">Supermercado BH disponibilizou 3 vagas de Assistente Administrativo. <a href="#" style="color:var(--green-text); font-weight:600; text-decoration:none;">Ver vaga →</a></div>
+      </div>
+      <button onclick="document.getElementById('alertBanner').style.display='none'" style="margin-left:auto; background:none; border:none; cursor:pointer; color:var(--green-text); opacity:0.6; padding:2px; flex-shrink:0;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Ranking Card -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Ranking de Prioridade de Jovens</div>
+          <div class="card-subtitle">Ordenado por score composto — vulnerabilidade, vínculo e disponibilidade</div>
+        </div>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="topbar-btn ghost" style="font-size:11px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            Exportar
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter pills -->
+      <div class="filter-row">
+        <button class="filter-pill active" data-filter="todos" onclick="applyFilter(this)">
+          Todos <span class="filter-count">10</span>
+        </button>
+        <button class="filter-pill" data-filter="acolhimento" onclick="applyFilter(this)">
+          Casa de Acolhimento <span class="filter-count">3</span>
+        </button>
+        <button class="filter-pill" data-filter="creas" onclick="applyFilter(this)">
+          CREAS <span class="filter-count">4</span>
+        </button>
+        <button class="filter-pill" data-filter="cras" onclick="applyFilter(this)">
+          CRAS <span class="filter-count">3</span>
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table id="rankingTable">
+          <thead>
+            <tr>
+              <th style="width:60px;">Posição</th>
+              <th>Nome</th>
+              <th style="width:80px;">Idade</th>
+              <th>Vínculo Atual</th>
+              <th>Score</th>
+              <th>Prioridade</th>
+              <th style="width:120px;">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- rows injected by JS -->
+          </tbody>
+        </table>
+        <div class="empty-state" id="emptyState">Nenhum jovem encontrado para este filtro.</div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ═══════════════ MODAL: Nova Vaga ═══════════════ -->
+<div class="modal-overlay" id="modal-nova-vaga">
+  <div class="modal">
+    <div class="modal-title">Cadastrar Nova Vaga</div>
+    <div class="modal-sub">Preencha os dados da oportunidade de emprego.</div>
+    <div class="modal-field">
+      <label>Empresa</label>
+      <input type="text" placeholder="Ex: Supermercado BH" />
+    </div>
+    <div class="modal-field">
+      <label>Cargo / Função</label>
+      <input type="text" placeholder="Ex: Auxiliar Administrativo" />
+    </div>
+    <div class="modal-field">
+      <label>Número de vagas</label>
+      <input type="number" min="1" placeholder="Ex: 3" />
+    </div>
+    <div class="modal-field">
+      <label>Perfil prioritário</label>
+      <select>
+        <option value="">Todos os vínculos</option>
+        <option>Casa de Acolhimento</option>
+        <option>CREAS</option>
+        <option>CRAS</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Observações</label>
+      <textarea placeholder="Requisitos, horários, benefícios..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeModal('nova-vaga')">Cancelar</button>
+      <button class="modal-btn-confirm" onclick="saveVaga()">Salvar Vaga</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL: Direcionar ═══════════════ -->
+<div class="modal-overlay" id="modal-direcionar">
+  <div class="modal">
+    <div class="modal-title">Direcionar Jovem</div>
+    <div class="modal-sub" id="direcionar-sub">Selecione a vaga para alocar o jovem.</div>
+    <div class="modal-field">
+      <label>Vaga disponível</label>
+      <select>
+        <option>Supermercado BH — Assistente Administrativo (3 vagas)</option>
+        <option>Padaria Central — Auxiliar de Produção (1 vaga)</option>
+        <option>Farmácia Vida — Atendente (2 vagas)</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Data prevista de início</label>
+      <input type="date" />
+    </div>
+    <div class="modal-field">
+      <label>Observação do encaminhamento</label>
+      <textarea placeholder="Anotações para o assistente social..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeModal('direcionar')">Cancelar</button>
+      <button class="modal-btn-confirm" onclick="confirmDirecionar()">Confirmar Alocação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL: Modificar Prioridade ═══════════════ -->
+<div class="modal-overlay" id="modal-prioridade">
+  <div class="modal">
+    <div class="modal-title">Ajustar Prioridade</div>
+    <div class="modal-sub" id="prioridade-sub">Modificação manual requer justificativa.</div>
+    <div class="modal-field">
+      <label>Nova prioridade</label>
+      <select id="prioridade-select">
+        <option value="urgente">🔴 Urgente — mover para o topo</option>
+        <option value="alta" selected>🟠 Alta — acima da média</option>
+        <option value="normal">🟡 Normal — posição calculada</option>
+        <option value="baixa">🔵 Baixa — aguardando melhor momento</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Justificativa (obrigatória)</label>
+      <textarea id="prioridade-justificativa" placeholder="Ex: Jovem com situação de moradia instável após saída do acolhimento..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeModal('prioridade')">Cancelar</button>
+      <button class="modal-btn-confirm" onclick="confirmPrioridade()">Salvar Ajuste</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toast-msg">Ação concluída com sucesso.</span>
+</div>
+
+<script>
+  // ── Data ──
+  const jovens = [
+    { id:1, nome:'Maria Souza',    idade:17, vinculo:'acolhimento', score:95, modificador:'Normal' },
+    { id:2, nome:'Pedro Santos',   idade:16, vinculo:'creas',       score:88, modificador:'Alta'   },
+    { id:3, nome:'Ana Paula',      idade:15, vinculo:'cras',        score:65, modificador:'Normal' },
+    { id:4, nome:'Lucas Ferreira', idade:17, vinculo:'creas',       score:82, modificador:'Normal' },
+    { id:5, nome:'Camila Rocha',   idade:16, vinculo:'acolhimento', score:79, modificador:'Baixa'  },
+    { id:6, nome:'João Mendes',    idade:15, vinculo:'cras',        score:74, modificador:'Normal' },
+    { id:7, nome:'Beatriz Lima',   idade:17, vinculo:'creas',       score:71, modificador:'Alta'   },
+    { id:8, nome:'Rafael Costa',   idade:16, vinculo:'acolhimento', score:68, modificador:'Normal' },
+    { id:9, nome:'Isabela Nunes',  idade:15, vinculo:'cras',        score:55, modificador:'Baixa'  },
+    { id:10,nome:'Gabriel Dias',   idade:16, vinculo:'creas',       score:48, modificador:'Normal' },
+  ];
+
+  const vinculoConfig = {
+    acolhimento: { label:'Casa de Acolhimento', tagClass:'red'   },
+    creas:       { label:'CREAS',               tagClass:'amber' },
+    cras:        { label:'CRAS',                tagClass:'blue'  },
+  };
+
+  let activeFilter = 'todos';
+  let currentJovemId = null;
+
+  function renderTable(filter) {
+    const tbody = document.getElementById('tableBody');
+    const emptyState = document.getElementById('emptyState');
+    const filtered = filter === 'todos' ? jovens : jovens.filter(j => j.vinculo === filter);
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '';
+      emptyState.style.display = 'block';
+      return;
+    }
+    emptyState.style.display = 'none';
+
+    tbody.innerHTML = filtered.map((j, idx) => {
+      const pos = idx + 1;
+      const posClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
+      const vc = vinculoConfig[j.vinculo];
+      const scoreWidth = j.score;
+      const barClass = j.score >= 80 ? '' : j.score >= 60 ? 'medium' : 'low';
+      return `
+        <tr data-vinculo="${j.vinculo}">
+          <td><span class="position-badge ${posClass}">${pos}</span></td>
+          <td class="young-name">${j.nome}</td>
+          <td class="young-age">${j.idade} anos</td>
+          <td><span class="tag ${vc.tagClass}">${vc.label}</span></td>
+          <td>
+            <div class="score-bar-wrap">
+              <div class="score-bar"><div class="score-bar-fill ${barClass}" style="width:${scoreWidth}%"></div></div>
+              <div class="score-cell">
+                <span class="score-value">${j.score} pts</span>
+                <div class="tooltip-wrap">
+                  <svg class="score-info-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div class="tooltip-box">Calculado com base em vulnerabilidade, tempo de espera e disponibilidade</div>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <button class="mod-btn" onclick="openModal('prioridade', ${j.id})">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              ${j.modificador}
+            </button>
+          </td>
+          <td>
+            <button class="btn-direcionar" onclick="openModal('direcionar', ${j.id})">
+              Direcionar
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function applyFilter(btn) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderTable(activeFilter);
+  }
+
+  // ── Modals ──
+  function openModal(type, jovemId) {
+    if (jovemId) {
+      currentJovemId = jovemId;
+      const j = jovens.find(x => x.id === jovemId);
+      if (type === 'direcionar') {
+        document.getElementById('direcionar-sub').textContent = `Encaminhando: ${j.nome} · ${j.score} pts`;
+      }
+      if (type === 'prioridade') {
+        document.getElementById('prioridade-sub').textContent = `Jovem: ${j.nome} · Status atual: ${j.modificador}`;
+      }
+    }
+    document.getElementById('modal-' + type).classList.add('open');
+  }
+
+  function closeModal(type) {
+    document.getElementById('modal-' + type).classList.remove('open');
+  }
+
+  function saveVaga() {
+    closeModal('nova-vaga');
+    showToast('Vaga cadastrada com sucesso!');
+  }
+
+  function confirmDirecionar() {
+    closeModal('direcionar');
+    showToast('Jovem direcionado à vaga com sucesso!');
+  }
+
+  function confirmPrioridade() {
+    const just = document.getElementById('prioridade-justificativa').value.trim();
+    if (!just) {
+      document.getElementById('prioridade-justificativa').focus();
+      document.getElementById('prioridade-justificativa').style.borderColor = 'var(--red)';
+      return;
+    }
+    document.getElementById('prioridade-justificativa').style.borderColor = '';
+    const novaP = document.getElementById('prioridade-select').value;
+    const labels = { urgente:'Urgente', alta:'Alta', normal:'Normal', baixa:'Baixa' };
+    if (currentJovemId) {
+      const j = jovens.find(x => x.id === currentJovemId);
+      if (j) j.modificador = labels[novaP];
+    }
+    closeModal('prioridade');
+    renderTable(activeFilter);
+    showToast('Prioridade ajustada e justificativa salva.');
+  }
+
+  // Close on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) {
+        const id = this.id.replace('modal-', '');
+        closeModal(id);
+      }
+    });
+  });
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  // ── Nav items ──
+  document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+  // Init
+  renderTable('todos');
+</script>
+</body>
+</html>
