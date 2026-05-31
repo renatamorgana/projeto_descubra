@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radar Descubra — SENAC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #f0f0f3;
+      --border: rgba(0,0,0,0.08);
+      --text: #111112;
+      --text2: #6b6b7a;
+      --text3: #9999a8;
+      --accent: #1a1a2e;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-text: #1d4ed8;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --green-text: #15803d;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --amber-text: #b45309;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --red-text: #b91c1c;
+      --purple: #7c3aed;
+      --purple-bg: #f5f3ff;
+      --purple-text: #6d28d9;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+      --sidebar-w: 240px;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--accent);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      padding: 0 0 1.5rem;
+    }
+    .sidebar-logo {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo .logo-row { display: flex; align-items: center; gap: 8px; }
+    .logo-icon {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: var(--blue);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sidebar-logo span {
+      font-size: 13px; font-weight: 600; color: #fff;
+      letter-spacing: -0.01em; display: block;
+    }
+    .sidebar-logo small {
+      font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 400; display: block; margin-top: 4px;
+    }
+    .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+    .nav-section-label {
+      font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.3);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 1rem 0.5rem 0.4rem;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.5rem 0.75rem; border-radius: var(--radius-xs);
+      color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      text-decoration: none; user-select: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-item svg { flex-shrink: 0; opacity: 0.7; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-badge {
+      margin-left: auto; background: var(--blue); color: #fff;
+      font-size: 10px; font-weight: 600; padding: 1px 6px;
+      border-radius: 99px; font-family: var(--mono);
+    }
+    .nav-badge.green { background: var(--green); }
+    .sidebar-footer {
+      padding: 0 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1rem;
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.5rem 0.75rem; border-radius: var(--radius-xs);
+    }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .sidebar-user-info span { display: block; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8); }
+    .sidebar-user-info small { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ── Main & SPA Views ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .view-content { display: none; }
+    .view-content.active-view { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-left h1 { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .topbar-left span { font-size: 12px; color: var(--text2); }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .topbar-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 0.875rem; height: 32px;
+      border-radius: var(--radius-xs); font-size: 12px; font-weight: 500;
+      cursor: pointer; border: none; font-family: var(--font); transition: background 0.15s;
+    }
+    .topbar-btn.ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .topbar-btn.ghost:hover { background: var(--surface2); }
+    .topbar-btn.primary { background: var(--accent); color: #fff; }
+
+    /* ── Content ── */
+    .content { padding: 1.75rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ── Tags / Badges ── */
+    .tag { display: inline-flex; align-items: center; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 99px; white-space: nowrap; }
+    .tag.green { background: var(--green-bg); color: var(--green-text); }
+    .tag.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .tag.red { background: var(--red-bg); color: var(--red-text); }
+    .tag.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .tag.purple { background: var(--purple-bg); color: var(--purple-text); }
+    .tag.gray { background: var(--surface2); color: var(--text2); }
+
+    /* ── KPI Cards ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.125rem 1.25rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 0.5rem; }
+    .kpi-header { display: flex; align-items: center; justify-content: space-between; }
+    .kpi-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+    .kpi-icon { width: 28px; height: 28px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; }
+    .kpi-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .kpi-icon.green { background: var(--green-bg); color: var(--green); }
+    .kpi-icon.amber { background: var(--amber-bg); color: var(--amber); }
+    .kpi-icon.purple { background: var(--purple-bg); color: var(--purple); }
+    .kpi-value { font-size: 28px; font-weight: 600; color: var(--text); letter-spacing: -0.03em; font-family: var(--mono); line-height: 1.1; }
+    .kpi-sub { font-size: 11px; color: var(--text3); }
+
+    /* ── Cards e Gráficos Simulados ── */
+    .grid-2x1 { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
+    .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+    
+    /* Progress Bars customizados */
+    .progress-wrapper { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+    .progress-item { display: flex; flex-direction: column; gap: 4px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 12px; }
+    .progress-bar-bg { width: 100%; height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.3s; }
+
+    /* Tablas Genéricas */
+    .app-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+    .app-table th { padding: 0.75rem 0.875rem; font-size: 11px; font-weight: 500; color: var(--text2); border-bottom: 1px solid var(--border); background: #fafafa; }
+    .app-table td { padding: 0.75rem 0.875rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+    .app-table tr:hover td { background: #fafbff; }
+
+    /* Filtros (Diário) */
+    .filter-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); }
+    .filter-panel-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+    .filter-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto auto; gap: 0.75rem; align-items: end; }
+    .filter-field { display: flex; flex-direction: column; gap: 4px; }
+    .filter-field label { font-size: 11px; font-weight: 500; color: var(--text2); }
+    .filter-select, .filter-input { font-family: var(--font); font-size: 13px; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-xs); padding: 0 0.75rem; height: 34px; background: var(--surface); outline: none; }
+    .btn-filter { height: 34px; padding: 0 1.125rem; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-xs); font-family: var(--font); font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .btn-clear-filter { height: 34px; padding: 0 1rem; background: transparent; color: var(--text2); border: 1px solid var(--border); border-radius: var(--radius-xs); font-family: var(--font); font-size: 12px; font-weight: 500; cursor: pointer; }
+
+    /* Listagem de Cards */
+    .cards-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+    .entity-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 0.75rem; }
+    .entity-card-header { display: flex; align-items: center; gap: 12px; }
+    .entity-avatar { width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; }
+
+    /* Restante do Estilo Original do Diário */
+    .turmas-wrap { display: flex; flex-direction: column; gap: 1.25rem; }
+    .turma-section-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .turma-section-label { font-size: 11px; font-weight: 600; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; }
+    .turma-section-divider { flex: 1; height: 1px; background: var(--border); }
+    .turma-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .turma-card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; }
+    .turma-info { display: flex; align-items: center; gap: 0.875rem; }
+    .turma-icon { width: 36px; height: 36px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .turma-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .turma-icon.gray { background: var(--surface2); color: var(--text3); }
+    .turma-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .turma-meta { font-size: 11px; color: var(--text3); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+    .turma-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text3); }
+    .turma-stats { display: flex; align-items: center; gap: 1.25rem; }
+    .turma-stat { text-align: right; }
+    .turma-stat-val { font-size: 15px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+    .turma-stat-label { font-size: 10px; color: var(--text3); }
+    .turma-chevron { color: var(--text3); transition: transform 0.2s; }
+    .turma-chevron.open { transform: rotate(180deg); }
+    .turma-body { display: none; }
+    .turma-body.open { display: block; }
+    .diario-toolbar { padding: 0.875rem 1.25rem; background: #f8f9fc; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .diario-date-row { display: flex; align-items: center; gap: 0.75rem; }
+    .diario-date-label { font-size: 12px; font-weight: 500; color: var(--text2); }
+    .diario-date-input { font-family: var(--font); font-size: 12px; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-xs); padding: 0 0.625rem; height: 30px; background: var(--surface); outline: none; }
+    .btn-marcar-todos { height: 30px; padding: 0 0.875rem; background: transparent; color: var(--text2); border: 1px solid var(--border); border-radius: var(--radius-xs); font-family: var(--font); font-size: 11px; font-weight: 500; cursor: pointer; }
+    .btn-salvar { height: 30px; padding: 0 1rem; background: var(--green); color: #fff; border: none; border-radius: var(--radius-xs); font-family: var(--font); font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .presenca-table-wrap { overflow-x: auto; }
+    .presenca-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .presenca-table th { text-align: left; padding: 0.5rem 0.875rem; font-size: 11px; font-weight: 500; color: var(--text2); border-bottom: 1px solid var(--border); background: #fafafa; }
+    .presenca-table td { padding: 0.65rem 0.875rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+    .name-cell { display: flex; align-items: center; gap: 10px; }
+    .name-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .name-avatar.blue { background: var(--blue-bg); color: var(--blue-text); }
+    .name-avatar.green { background: var(--green-bg); color: var(--green-text); }
+    .name-avatar.amber { background: var(--amber-bg); color: var(--amber-text); }
+    .name-avatar.purple { background: var(--purple-bg); color: var(--purple-text); }
+    .name-avatar.red { background: var(--red-bg); color: var(--red-text); }
+    .name-primary { font-size: 12px; font-weight: 600; color: var(--text); }
+    .name-secondary { font-size: 11px; color: var(--text3); }
+    .presenca-radio-group { display: flex; align-items: center; gap: 4px; justify-content: center; }
+    .presenca-radio-label { display: flex; align-items: center; justify-content: center; width: 30px; height: 28px; border-radius: var(--radius-xs); border: 1px solid var(--border); font-size: 11px; font-weight: 600; cursor: pointer; color: var(--text2); background: var(--surface); }
+    .presenca-radio { position: absolute; opacity: 0; pointer-events: none; }
+    .presenca-radio:checked + .presenca-radio-label.p { background: var(--green-bg); border-color: var(--green); color: var(--green-text); }
+    .presenca-radio:checked + .presenca-radio-label.f { background: var(--red-bg); border-color: var(--red); color: var(--red-text); }
+    .presenca-radio:checked + .presenca-radio-label.j { background: var(--amber-bg); border-color: var(--amber); color: var(--amber-text); }
+    .obs-input { font-family: var(--font); font-size: 11px; color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-xs); padding: 0.3rem 0.5rem; width: 100%; min-width: 160px; background: var(--surface); outline: none; resize: none; height: 30px; }
+    .freq-cell { display: flex; align-items: center; gap: 6px; }
+    .freq-bar { flex: 1; height: 4px; border-radius: 99px; background: var(--surface2); overflow: hidden; min-width: 40px; }
+    .freq-fill { height: 100%; border-radius: 99px; }
+    .freq-fill.high { background: var(--green); }
+    .freq-fill.mid { background: var(--amber); }
+    .freq-fill.low { background: var(--red); }
+    .freq-val { font-size: 11px; font-weight: 600; font-family: var(--mono); }
+    .freq-val.high { color: var(--green-text); }
+    .freq-val.mid { color: var(--amber-text); }
+    .freq-val.low { color: var(--red-text); }
+    .turma-footer { padding: 0.875rem 1.25rem; background: #f8f9fc; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .turma-footer-info { font-size: 11px; color: var(--text3); }
+    .btn-salvar-diario { height: 34px; padding: 0 1.25rem; background: var(--blue); color: #fff; border: none; border-radius: var(--radius-xs); font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+    .toast { background: var(--accent); color: #fff; padding: 0.75rem 1.125rem; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.18); display: flex; align-items: center; gap: 0.625rem; pointer-events: all; animation: toastIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both; max-width: 340px; }
+    .toast.success { background: var(--green); }
+    .toast.info { background: var(--blue); }
+    .toast.error { background: var(--red); }
+    .hist-chip { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; font-size: 9px; font-weight: 700; font-family: var(--mono); }
+    .hist-chip.P { background: var(--green-bg); color: var(--green-text); }
+    .hist-chip.F { background: var(--red-bg); color: var(--red-text); }
+    .hist-chip.J { background: var(--amber-bg); color: var(--amber-text); }
+    .hist-row { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+    .aula-num { font-size: 10px; font-weight: 600; font-family: var(--mono); background: var(--blue-bg); color: var(--blue-text); padding: 1px 6px; border-radius: 99px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+        </svg>
+      </div>
+      <span>Radar Descubra!</span>
+    </div>
+    <small>Módulo Formador — SENAC</small>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navegação</div>
+
+    <div class="nav-item active" id="nav-visao-geral" onclick="switchView('visao-geral')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Visão Geral
+    </div>
+
+    <div class="nav-item" id="nav-diario" onclick="switchView('diario')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+      Diário de Classe
+    </div>
+
+    <div class="nav-item" id="nav-alunos" onclick="switchView('alunos')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Alunos
+    </div>
+
+    <div class="nav-item" id="nav-empresas" onclick="switchView('empresas')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 21H2V3h20v18zM10 7H6v4h4V7zm8 0h-4v4h4V7zM10 13H6v4h4V13zm8 0h-4v4h4V13z"/></svg>
+      Empresas Parceiras
+    </div>
+
+    <div class="nav-section-label">Relatórios</div>
+
+    <div class="nav-item" id="nav-relatorios" onclick="switchView('relatorios')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Frequência & Analytics
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar">MS</div>
+      <div class="sidebar-user-info">
+        <span>Maria Santos</span>
+        <small>Coordenadora SENAC</small>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 id="topbar-title">Visão Geral — Programa Descubra</h1>
+      <span>Painel Central de Gestão Integrada · SENAC</span>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn ghost" onclick="showToastMsg('Relatório global exportado com sucesso!', 'success')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar
+      </button>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <div id="view-visao-geral" class="view-content active-view">
+      <div class="kpi-grid" id="vg-kpis"></div>
+      
+      <div class="grid-2x1">
+        <div class="card">
+          <div class="card-title">Resumo de Atividades Recentes e Turmas</div>
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th>Nome da Turma</th>
+                <th>Curso Relacionado</th>
+                <th>Período</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="vg-turmas-table"></tbody>
+          </table>
+        </div>
+        
+        <div class="card">
+          <div class="card-title">Distribuição por Entidade</div>
+          <div class="progress-wrapper" id="vg-entidades-progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-diario" class="view-content">
+      <div class="filter-panel">
+        <div class="filter-panel-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></polygon></svg>
+          Filtros de Gestão de Turma
+        </div>
+        <div class="filter-row">
+          <div class="filter-field"><label>Curso</label><select class="filter-select" id="f-curso"><option value="">Todos os cursos</option></select></div>
+          <div class="filter-field"><label>Empresa Parceira</label><select class="filter-select" id="f-empresa"><option value="">Todas as empresas</option></select></div>
+          <div class="filter-field"><label>Entidade Responsável</label><select class="filter-select" id="f-entidade"><option value="">Todas as entidades</option><option value="CRAS">CRAS</option><option value="CREAS">CREAS</option><option value="Casa de Acolhimento">Casa de Acolhimento</option></select></div>
+          <button class="btn-filter" onclick="aplicarFiltros()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>Filtrar</button>
+          <button class="btn-clear-filter" onclick="limparFiltros()">Limpar</button>
+        </div>
+      </div>
+      <div id="turmas-container"></div>
+    </div>
+
+    <div id="view-alunos" class="view-content">
+      <div class="filter-panel">
+        <div class="filter-panel-title">Buscar Aluno</div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="search-aluno-input" class="filter-input" placeholder="Digite o nome do jovem..." style="flex: 1;" oninput="renderAlunosView()">
+          <button class="btn-filter" onclick="document.getElementById('search-aluno-input').value=''; renderAlunosView();">Limpar Filtro</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ficha de Frequência Individual dos Alunos</div>
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Aluno</th>
+              <th>Turma Vinculada</th>
+              <th>Entidade</th>
+              <th>Frequência</th>
+              <th>Última Observação Registrada</th>
+            </tr>
+          </thead>
+          <tbody id="alunos-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-empresas" class="view-content">
+      <div class="cards-list" id="empresas-cards-container"></div>
+    </div>
+
+    <div id="view-relatorios" class="view-content">
+      <div class="grid-2x2">
+        <div class="card">
+          <div class="card-title">Visão Geral de Alunos Alocados Abaixo da Média (Risco < 75%)</div>
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th>Aluno</th>
+                <th>Frequência Atual</th>
+                <th>Status de Risco</th>
+              </tr>
+            </thead>
+            <tbody id="relatorio-risco-table"></tbody>
+          </table>
+        </div>
+        
+        <div class="card">
+          <div class="card-title">Ranking de Frequência por Curso</div>
+          <div class="progress-wrapper" id="relatorio-cursos-progress"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ── DATA INICIAL DO ARQUIVO ORIGINAL CONTENDO TODA A ESTRUTURA DO BANCO DE DADOS EM MEMÓRIA ──
+const TURMAS = [
+  { id: 'T2023A', nome: 'Turma Empreender 2023/A', curso: 'Empreendedorismo e Inovação', inicio: '2023-03-01', fim: '2023-09-30', empresa: 'Mercado Livre', cor: 'gray', cargaHoraria: 200, aulasTotal: 80 },
+  { id: 'T2024B', nome: 'Turma Administração 2024/B', curso: 'Auxiliar Administrativo', inicio: '2024-02-05', fim: '2024-08-30', empresa: 'Localfrio BH', cor: 'gray', cargaHoraria: 160, aulasTotal: 64 },
+  { id: 'T2025A', nome: 'Turma Tecnologia 2025/A', curso: 'Informática Básica e Digital', inicio: '2025-10-06', fim: '2026-06-30', empresa: 'Supermercado BH', cor: 'blue', cargaHoraria: 240, aulasTotal: 96 }
+];
+
+const ALUNOS = [
+  { id: 1, nomeCompleto: 'Beatriz Oliveira Martins', iniciais: 'BO', cor: 'blue', curso: 'Empreendedorismo e Inovação', empresaParceira: 'Mercado Livre', entidadeResponsavel: 'CRAS', turmaId: 'T2023A', observacoes: ['Excelente participação durante todo o módulo', 'Apresentou projeto final com destaque'], historico: ['P','P','P','F','P','P','J','P','P','P','P','F','P','P','P'] },
+  { id: 2, nomeCompleto: 'Carlos Eduardo Souza', iniciais: 'CE', cor: 'green', curso: 'Empreendedorismo e Inovação', empresaParceira: 'Mercado Livre', entidadeResponsavel: 'CREAS', turmaId: 'T2023A', observacoes: ['Dificuldade inicial com conteúdo digital', 'Superou expectativas no módulo prático'], historico: ['P','F','P','P','J','P','P','P','F','P','P','P','P','P','P'] },
+  { id: 3, nomeCompleto: 'Fernanda Lima Costa', iniciais: 'FL', cor: 'purple', curso: 'Empreendedorismo e Inovação', empresaParceira: 'Mercado Livre', entidadeResponsavel: 'Casa de Acolhimento', turmaId: 'T2023A', observacoes: ['Histórico de vulnerabilidade social — acompanhamento especial', 'Concluiu com aproveitamento satisfatório'], historico: ['P','P','P','P','P','F','F','J','P','P','P','P','P','F','P'] },
+  { id: 4, nomeCompleto: 'Gabriel Henrique Alves', iniciais: 'GH', cor: 'amber', curso: 'Auxiliar Administrativo', empresaParceira: 'Localfrio BH', entidadeResponsavel: 'CRAS', turmaId: 'T2024B', observacoes: ['Pontualidade exemplar', 'Participou de todas as atividades práticas'], historico: ['P','P','P','P','P','P','P','P','J','P','P','P','F','P','P'] },
+  { id: 5, nomeCompleto: 'Isabela Rodrigues Ferreira', iniciais: 'IR', cor: 'red', curso: 'Auxiliar Administrativo', empresaParceira: 'Localfrio BH', entidadeResponsavel: 'CREAS', turmaId: 'T2024B', observacoes: ['Apresentou atestado médico em 3 ocasiões', 'Desempenho acadêmico acima da média'], historico: ['J','P','P','P','P','J','P','P','P','P','F','P','P','P','P'] },
+  { id: 6, nomeCompleto: 'João Pedro Nascimento', iniciais: 'JP', cor: 'blue', curso: 'Auxiliar Administrativo', empresaParceira: 'Localfrio BH', entidadeResponsavel: 'Casa de Acolhimento', turmaId: 'T2024B', observacoes: ['Encaminhamento para emprego ao término do curso'], historico: ['P','P','F','P','P','P','P','P','P','J','P','P','P','P','P'] },
+  { id: 7, nomeCompleto: 'Larissa Pinto Cavalcante', iniciais: 'LP', cor: 'green', curso: 'Auxiliar Administrativo', empresaParceira: 'Localfrio BH', entidadeResponsavel: 'CRAS', turmaId: 'T2024B', observacoes: ['Representante de turma', 'Organizou atividade extraclasse com apoio da coordenação'], historico: ['P','P','P','P','P','P','P','P','P','P','P','P','F','P','P'] },
+  { id: 8, nomeCompleto: 'Matheus Barbosa Teixeira', iniciais: 'MB', cor: 'purple', curso: 'Informática Básica e Digital', empresaParceira: 'Supermercado BH', entidadeResponsavel: 'CRAS', turmaId: 'T2025A', observacoes: ['Nunca teve contato com computador antes do curso', 'Evolução notável em 4 semanas'], historico: ['P','P','F','P','P'] },
+  { id: 9, nomeCompleto: 'Natália Cardoso Mendes', iniciais: 'NC', cor: 'amber', curso: 'Informática Básica e Digital', empresaParceira: 'Supermercado BH', entidadeResponsavel: 'CREAS', turmaId: 'T2025A', observacoes: ['Chegou 20min atrasada na 3ª aula — problema de transporte', 'Solicitou recurso de transporte à entidade'], historico: ['P','P','P','J','P'] },
+  { id: 10, nomeCompleto: 'Pedro Augusto Vieira Santos', iniciais: 'PV', cor: 'red', curso: 'Informática Básica e Digital', empresaParceira: 'Supermercado BH', entidadeResponsavel: 'Casa de Acolhimento', turmaId: 'T2025A', observacoes: ['Residente na Casa de Acolhimento Norte — acompanhamento semanal com psicóloga'], historico: ['P','P','P','P','F'] },
+  { id: 11, nomeCompleto: 'Rafaela Monteiro Gomes', iniciais: 'RM', cor: 'blue', curso: 'Informática Básica e Digital', empresaParceira: 'Supermercado BH', entidadeResponsavel: 'CRAS', turmaId: 'T2025A', observacoes: ['Interesse particular em redes sociais e marketing digital'], historico: ['P','P','P','P','P'] },
+  { id: 12, nomeCompleto: 'Thiago Luís Carvalho', iniciais: 'TC', cor: 'green', curso: 'Informática Básica e Digital', empresaParceira: 'Supermercado BH', entidadeResponsavel: 'CREAS', turmaId: 'T2025A', observacoes: ['Apresentou documentação de vulnerabilidade social updated.'], historico: ['F','P','P','P','P'] }
+];
+
+// Estado reativo da aplicação
+let alunosFiltrados = [...ALUNOS];
+let presencaHoje = {};
+let obsHoje = {};
+
+// ── UTILS GERAIS REVEPROVEITADOS DO DIÁRIO ──
+function isTurmaAtiva(turma) {
+  const hoje = new Date('2026-05-31'); // Alinhado com a data simulada do cenário
+  return hoje >= new Date(turma.inicio) && hoje <= new Date(turma.fim);
+}
+function formatDate(str) { const [y, m, d] = str.split('-'); return `${d}/${m}/${y}`; }
+function calcFreq(historico) { if (!historico || historico.length === 0) return 0; const presencas = historico.filter(h => h === 'P').length; return Math.round((presencas / historico.length) * 100); }
+function getFreqClass(pct) { return pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low'; }
+function getAlunosDaTurma(turmaId) { return alunosFiltrados.filter(a => a.turmaId === turmaId); }
+function todayStr() { return '2026-05-31'; }
+function aulaNumDaTurma(turma) { return isTurmaAtiva(turma) ? 5 : turma.aulasTotal; }
+
+// ── SISTEMA DE NAVEGAÇÃO DE PÁGINA ÚNICA (SPA) ──
+function switchView(viewId) {
+  document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active-view'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  
+  document.getElementById(`view-${viewId}`).classList.add('active-view');
+  
+  const navMap = { 'visao-geral': 'nav-visao-geral', 'diario': 'nav-diario', 'alunos': 'nav-alunos', 'empresas': 'nav-empresas', 'relatorios': 'nav-relatorios' };
+  document.getElementById(navMap[viewId]).classList.add('active');
+
+  const titles = { 'visao-geral': 'Visão Geral — Programa Descubra', 'diario': 'Diário de Classe — Programa Descubra', 'alunos': 'Gestão de Alunos — Listagem Unificada', 'empresas': 'Empresas Parceiras — Módulo de Aprendizagem', 'relatorios': 'Relatórios, Indicadores e Analytics' };
+  document.getElementById('topbar-title').innerText = titles[viewId];
+
+  if(viewId === 'visao-geral') renderVisaoGeral();
+  if(viewId === 'alunos') renderAlunosView();
+  if(viewId === 'empresas') renderEmpresasView();
+  if(viewId === 'relatorios') renderRelatoriosView();
+}
+
+// ══════════════════════════════════
+//  🌟 CONTROLLER 1: VISÃO GERAL
+// ══════════════════════════════════
+function renderVisaoGeral() {
+  const mediaGeral = Math.round(ALUNOS.reduce((acc, current) => acc + calcFreq(current.historico), 0) / ALUNOS.length);
+  const totalEmpresas = [...new Set(TURMAS.map(t => t.empresa))].length;
+
+  // Render KPIs
+  document.getElementById('vg-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Total de Alunos</span><div class="kpi-icon blue">👥</div></div><div class="kpi-value">${ALUNOS.length}</div><div class="kpi-sub">Cadastrados no sistema</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Frequência Geral</span><div class="kpi-icon green">📈</div></div><div class="kpi-value">${mediaGeral}%</div><div class="kpi-sub">Média consolidada</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Empresas Integradas</span><div class="kpi-icon amber">🏢</div></div><div class="kpi-value">${totalEmpresas}</div><div class="kpi-sub">Parcerias ativas</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Turmas Ativas</span><div class="kpi-icon purple">🎓</div></div><div class="kpi-value">${TURMAS.filter(t => isTurmaAtiva(t)).length}</div><div class="kpi-sub">Em andamento na rede</div></div>
+  `;
+
+  // Render Tabela de Turmas
+  document.getElementById('vg-turmas-table').innerHTML = TURMAS.map(t => `
+    <tr>
+      <td><strong>${t.nome}</strong></td>
+      <td>${t.curso}</td>
+      <td>${formatDate(t.inicio)} até ${formatDate(t.fim)}</td>
+      <td><span class="tag ${isTurmaAtiva(t) ? 'green' : 'gray'}">${isTurmaAtiva(t) ? 'Ativa' : 'Concluída'}</span></td>
+    </tr>
+  `).join('');
+
+  // Render Barras de Entidade
+  const contagemEntidades = ALUNOS.reduce((acc, cur) => { acc[cur.entidadeResponsavel] = (acc[cur.entidadeResponsavel] || 0) + 1; return acc; }, {});
+  document.getElementById('vg-entidades-progress').innerHTML = Object.keys(contagemEntidades).map(entidade => {
+    const pct = Math.round((contagemEntidades[entidade] / ALUNOS.length) * 100);
+    return `
+      <div class="progress-item">
+        <div class="progress-info"><span>${entidade}</span><strong>${contagemEntidades[entidade]} jovens (${pct}%)</strong></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%; background: var(--purple);"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════
+//  👥 CONTROLLER 2: ALUNOS
+// ══════════════════════════════════
+function renderAlunosView() {
+  const query = document.getElementById('search-aluno-input')?.value.toLowerCase() || '';
+  const listagem = ALUNOS.filter(a => a.nomeCompleto.toLowerCase().includes(query));
+
+  document.getElementById('alunos-table-body').innerHTML = listagem.map(a => {
+    const f = calcFreq(a.historico);
+    const fc = getFreqClass(f);
+    const t = TURMAS.find(turma => turma.id === a.turmaId);
+    return `
+      <tr>
+        <td>
+          <div class="name-cell">
+            <div class="name-avatar ${a.cor}">${a.iniciais}</div>
+            <div><div class="name-primary">${a.nomeCompleto}</div><div class="name-secondary">ID #${a.id}</div></div>
+          </div>
+        </td>
+        <td>${t ? t.nome : 'Sem vínculo'}</td>
+        <td><span class="tag gray">${a.entidadeResponsavel}</span></td>
+        <td>
+          <div class="freq-cell">
+            <div class="freq-bar"><div class="freq-fill ${fc}" style="width:${f}%"></div></div>
+            <span class="freq-val ${fc}">${f}%</span>
+          </div>
+        </td>
+        <td style="color: var(--text2); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          ${a.observacoes[a.observacoes.length - 1] || '<i>Nenhuma observação registrada.</i>'}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════
+//  🏢 CONTROLLER 3: EMPRESAS PARCEIRAS
+// ══════════════════════════════════
+function renderEmpresasView() {
+  const empresasMap = TURMAS.reduce((acc, t) => {
+    if (!acc[t.empresa]) { acc[t.empresa] = { turmasVinculadas: [], totalVagas: 0 }; }
+    const alunosDaEmpresa = ALUNOS.filter(a => a.empresaParceira === t.empresa).length;
+    acc[t.empresa].turmasVinculadas.push(t.nome);
+    acc[t.empresa].totalVagas += alunosDaEmpresa;
+    return acc;
+  }, {});
+
+  document.getElementById('empresas-cards-container').innerHTML = Object.keys(empresasMap).map(nome => `
+    <div class="entity-card">
+      <div class="entity-card-header">
+        <div class="entity-avatar" style="background: var(--blue-bg); color: var(--blue-text)">🏢</div>
+        <div><h3 style="font-size: 15px; font-weight: 600;">${nome}</h3><p style="font-size: 11px; color: var(--text3)">Parceiro Conectado</p></div>
+      </div>
+      <div>
+        <p style="font-size: 12px; margin-bottom: 4px;"><strong>Turmas associadas:</strong></p>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          ${empresasMap[nome].turmasVinculadas.map(tName => `<span class="tag gray" style="justify-content: flex-start;">🎓 ${tName}</span>`).join('')}
+        </div>
+      </div>
+      <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size:12px;">
+        <span>Jovens Aprendizes:</span><strong>${empresasMap[nome].totalVagas} alocações</strong>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════
+//  📊 CONTROLLER 4: RELATÓRIOS
+// ══════════════════════════════════
+function renderRelatoriosView() {
+  // Alunos em risco de reprovação (Frequência < 75%)
+  const alunosEmRisco = ALUNOS.filter(a => calcFreq(a.historico) < 75);
+  document.getElementById('relatorio-risco-table').innerHTML = alunosEmRisco.length ? alunosEmRisco.map(a => `
+    <tr>
+      <td><strong>${a.nomeCompleto}</strong><br><small style="color:var(--text3)">${a.curso}</small></td>
+      <td><span class="freq-val low">${calcFreq(a.historico)}%</span></td>
+      <td><span class="tag red">Crítico (Evasão)</span></td>
+    </tr>
+  `).join('') : `<tr><td colspan="3" style="text-align:center; color: var(--text3);">Nenhum aluno em estado de risco crítico!</td></tr>`;
+
+  // Média de frequência por Curso
+  const cursosAgrupados = ALUNOS.reduce((acc, a) => {
+    if (!acc[a.curso]) acc[a.curso] = { soma: 0, qtd: 0 };
+    acc[a.curso].soma += calcFreq(a.historico);
+    acc[a.curso].qtd += 1;
+    return acc;
+  }, {});
+
+  document.getElementById('relatorio-cursos-progress').innerHTML = Object.keys(cursosAgrupados).map(curso => {
+    const media = Math.round(cursosAgrupados[curso].soma / cursosAgrupados[curso].qtd);
+    return `
+      <div class="progress-item">
+        <div class="progress-info"><span>${curso}</span><strong>${media}% Aproveitamento</strong></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${media}%; background: var(--green);"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════
+//  📝 DIÁRIO DE CLASSE (LÓGICA ORIGINAL PRESERVADA)
+// ══════════════════════════════════
+function populateFilters() {
+  const cursos = [...new Set(ALUNOS.map(a => a.curso))].sort();
+  const empresas = [...new Set(ALUNOS.map(a => a.empresaParceira))].sort();
+  const selCurso = document.getElementById('f-curso');
+  cursos.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; selCurso.appendChild(o); });
+  const selEmpresa = document.getElementById('f-empresa');
+  empresas.forEach(e => { const o = document.createElement('option'); o.value = e; o.textContent = e; selEmpresa.appendChild(o); });
+}
+
+function aplicarFiltros() {
+  const curso = document.getElementById('f-curso').value;
+  const empresa = document.getElementById('f-empresa').value;
+  const entidade = document.getElementById('f-entidade').value;
+  alunosFiltrados = ALUNOS.filter(a => {
+    if (curso && a.curso !== curso) return false;
+    if (empresa && a.empresaParceira !== empresa) return false;
+    if (entidade && a.entidadeResponsavel !== entidade) return false;
+    return true;
+  });
+  renderTurmas();
+  showToastMsg(`Filtros aplicados com sucesso!`, 'info');
+}
+
+function limparFiltros() {
+  document.getElementById('f-curso').value = '';
+  document.getElementById('f-empresa').value = '';
+  document.getElementById('f-entidade').value = '';
+  alunosFiltrados = [...ALUNOS];
+  renderTurmas();
+}
+
+function renderTurmas() {
+  const container = document.getElementById('turmas-container');
+  const turmasAtivas = TURMAS.filter(t => isTurmaAtiva(t));
+  const turmasConcluidas = TURMAS.filter(t => !isTurmaAtiva(t));
+  let html = '<div class="turmas-wrap">';
+
+  if (turmasAtivas.length) {
+    html += `<div class="turma-section-header"><span class="turma-section-label">Turmas Ativas</span><span class="tag green">● Em andamento</span><div class="turma-section-divider"></div></div>`;
+    turmasAtivas.forEach(t => { html += renderTurmaCard(t, true); });
+  }
+  if (turmasConcluidas.length) {
+    html += `<div class="turma-section-header" style="margin-top:0.5rem"><span class="turma-section-label">Turmas Concluídas</span><div class="turma-section-divider"></div></div>`;
+    turmasConcluidas.forEach(t => { html += renderTurmaCard(t, false); });
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderTurmaCard(turma, ativa) {
+  const alunos = getAlunosDaTurma(turma.id);
+  const totalAlunos = alunos.length;
+  const mediaFreq = totalAlunos ? Math.round(alunos.reduce((s, a) => s + calcFreq(a.historico), 0) / totalAlunos) : 0;
+  return `
+    <div class="turma-card">
+      <div class="turma-card-header" onclick="toggleTurma('${turma.id}')">
+        <div class="turma-info">
+          <div class="turma-icon ${ativa ? 'blue' : 'gray'}">🎓</div>
+          <div>
+            <div class="turma-name">${turma.nome}</div>
+            <div class="turma-meta">${turma.curso} <span class="turma-meta-dot"></span> ${turma.empresa}</div>
+          </div>
+        </div>
+        <div class="turma-header-right">
+          <div class="turma-stats">
+            <div class="turma-stat"><div class="turma-stat-val">${totalAlunos}</div><div class="turma-stat-label">alunos</div></div>
+            <div class="turma-stat"><div class="turma-stat-val">${mediaFreq}%</div><div class="turma-stat-label">freq. média</div></div>
+          </div>
+          <svg class="turma-chevron" id="chevron-${turma.id}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="turma-body" id="body-${turma.id}">${renderDiario(turma, alunos)}</div>
+    </div>
+  `;
+}
+
+function renderDiario(turma, alunos) {
+  const ativa = isTurmaAtiva(turma);
+  const rows = alunos.map(aluno => {
+    const freq = calcFreq(aluno.historico);
+    const freqClass = getFreqClass(freq);
+    const histChips = aluno.historico.slice(-8).map(h => `<span class="hist-chip ${h}">${h}</span>`).join('');
+    return `
+      <tr>
+        <td>
+          <div class="name-cell">
+            <div class="name-avatar ${aluno.cor}">${aluno.iniciais}</div>
+            <div><div class="name-primary">${aluno.nomeCompleto}</div></div>
+          </div>
+        </td>
+        <td><span class="tag gray">${aluno.entidadeResponsavel}</span></td>
+        <td><div class="hist-row">${histChips}</div></td>
+        <td>
+          <div class="freq-cell">
+            <div class="freq-bar"><div class="freq-fill ${freqClass}" style="width:${freq}%"></div></div>
+            <span class="freq-val ${freqClass}">${freq}%</span>
+          </div>
+        </td>
+        <td class="center">
+          ${ativa ? `
+          <div class="presenca-radio-group">
+            <label><input type="radio" class="presenca-radio" name="pres-${turma.id}-${aluno.id}" value="P" onchange="setPresenca('${turma.id}',${aluno.id},'P')"><span class="presenca-radio-label p">P</span></label>
+            <label><input type="radio" class="presenca-radio" name="pres-${turma.id}-${aluno.id}" value="F" onchange="setPresenca('${turma.id}',${aluno.id},'F')"><span class="presenca-radio-label f">F</span></label>
+            <label><input type="radio" class="presenca-radio" name="pres-${turma.id}-${aluno.id}" value="J" onchange="setPresenca('${turma.id}',${aluno.id},'J')"><span class="presenca-radio-label j">J</span></label>
+          </div>` : `<span class="tag gray">Finalizada</span>`}
+        </td>
+        <td>
+          ${ativa ? `<textarea class="obs-input" placeholder="Observação do dia..." onchange="setObs('${turma.id}',${aluno.id},this.value)"></textarea>` : `<span style="font-size:11px;color:var(--text3)">${aluno.observacoes[aluno.observacoes.length-1] || '—'}</span>`}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    ${ativa ? `<div class="diario-toolbar"><div class="diario-date-row"><span class="diario-date-label">Registro:</span><input type="date" class="diario-date-input" value="${todayStr()}"><span class="aula-num">Aula ${aulaNumDaTurma(turma)}ª</span></div><button class="btn-salvar" onclick="salvarDiario('${turma.id}')">Salvar Diário</button></div>` : ''}
+    <div class="presenca-table-wrap"><table class="presenca-table"><thead><tr><th>Aluno</th><th>Entidade</th><th>Últimas Aulas</th><th>Frequência</th><th class="center">Presença</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table></div>
+  `;
+}
+
+function toggleTurma(turmaId) {
+  const body = document.getElementById(`body-${turmaId}`);
+  const chevron = document.getElementById(`chevron-${turmaId}`);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+}
+
+function setPresenca(turmaId, alunoId, valor) { presencaHoje[`${turmaId}-${alunoId}`] = valor; }
+function setObs(turmaId, alunoId, texto) { obsHoje[`${turmaId}-${alunoId}`] = texto; }
+
+function salvarDiario(turmaId) {
+  const alunos = getAlunosDaTurma(turmaId);
+  alunos.forEach(a => {
+    const status = presencaHoje[`${turmaId}-${a.id}`];
+    if (status) {
+      a.historico.push(status);
+      const obs = obsHoje[`${turmaId}-${a.id}`];
+      if (obs) a.observacoes.push(`[31/05/2026] ${obs}`);
+    }
+  });
+  showToastMsg(`✓ Diário de Classe salvo com sucesso!`, 'success');
+  renderTurmas();
+}
+
+function showToastMsg(msg, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = msg;
+  container.appendChild(toast);
+  setTimeout(() => { toast.remove(); }, 3000);
+}
+
+// ── INICIALIZAÇÃO DO ECOSSISTEMA ──
+function init() {
+  populateFilters();
+  renderVisaoGeral();
+  renderTurmas();
+}
+init();
+</script>
+</body>
+</html>
